@@ -1,8 +1,7 @@
-output "instance_ami" {
+output "microk8s_instance_ami" {
   value = aws_instance.ubuntu.ami
 }
 
-output "instance_arn" {
+output "microk8s_instance_arn" {
   value = aws_instance.ubuntu.arn
 }
-
