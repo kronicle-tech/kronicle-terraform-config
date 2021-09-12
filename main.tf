@@ -1,5 +1,5 @@
 provider "aws" {
-  region = var.region
+  region = var.aws_region
 }
 
 data "aws_ami" "ubuntu" {
@@ -20,9 +20,9 @@ data "aws_ami" "ubuntu" {
 
 resource "aws_instance" "ubuntu" {
   ami           = data.aws_ami.ubuntu.id
-  instance_type = var.instance_type
+  instance_type = var.microk8s_instance_type
 
   tags = {
-    Name = var.instance_name
+    Name = var.microk8s_instance_name
   }
 }
