@@ -1,12 +1,12 @@
-variable "region" {
+variable "aws_region" {
   description = "AWS region"
 }
 
-variable "instance_type" {
+variable "microk8s_instance_type" {
   description = "Type of EC2 instance to provision"
 }
 
-variable "instance_name" {
+variable "microk8s_instance_name" {
   description = "EC2 instance name"
 }
 
