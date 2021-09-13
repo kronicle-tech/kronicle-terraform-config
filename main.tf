@@ -25,4 +25,6 @@ resource "aws_instance" "ubuntu" {
   tags = {
     Name = var.microk8s_instance_name
   }
+
+  user_data = file("${path.cwd}/microk8s_install_script.sh")
 }
