@@ -71,10 +71,10 @@ resource "aws_security_group" "wireguard_public_internet" {
   }
 
   ingress {
-    from_port   = var.wireguard_port
-    to_port     = var.wireguard_port
+    from_port   = var.wireguard_listen_port
+    to_port     = var.wireguard_listen_port
     protocol    = "udp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = var.wireguard_peer_cidr_blocks
   }
 
   egress {
@@ -135,8 +135,8 @@ resource "aws_instance" "wireguard" {
   }
 
   user_data = templatefile("${path.cwd}/wireguard-install-script.sh.tpl", {
-    cidr_block = var.wireguard_cidr_block,
-    port = var.wireguard_port,
+    address = var.wireguard_address,
+    listen_port = var.wireguard_listen_port,
     private_key = var.wireguard_private_key,
     peers = var.wireguard_peers
   })

@@ -28,12 +28,17 @@ variable "wireguard_cpu_credits" {
   default = "standard"
 }
 
-variable "wireguard_cidr_block" {
-  description = "WireGuard CIDR block"
+variable "wireguard_peer_cidr_blocks" {
+  description = "Public CIDR blocks for WireGuard peers"
+  default = ["1.2.3.4/32"]
+}
+
+variable "wireguard_address" {
+  description = "WireGuard server address"
   default = "10.2.0.0/24"
 }
 
-variable "wireguard_port" {
+variable "wireguard_listen_port" {
   description = "WireGuard UDP port"
   default = 1234
 }
