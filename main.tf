@@ -71,8 +71,8 @@ resource "aws_security_group" "wireguard_public_internet" {
   }
 
   ingress {
-    from_port   = var.wireguard_port
-    to_port     = var.wireguard_port
+    from_port   = var.wireguard_listen_port
+    to_port     = var.wireguard_listen_port
     protocol    = "udp"
     cidr_blocks = var.wireguard_peer_cidr_blocks
   }
