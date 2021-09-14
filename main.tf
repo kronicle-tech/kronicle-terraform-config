@@ -126,7 +126,7 @@ resource "aws_instance" "wireguard" {
   vpc_security_group_ids      = [
     aws_security_group.wireguard_public_internet.id, aws_security_group.wireguard_internal.id]
 
-  credit_specification = {
+  credit_specification {
     cpu_credits = var.wireguard_cpu_credits
   }
 
@@ -149,7 +149,7 @@ resource "aws_instance" "microk8s" {
   subnet_id         = aws_subnet.public.id
   instance_type     = var.microk8s_instance_type
 
-  credit_specification = {
+  credit_specification {
     cpu_credits = var.microk8s_cpu_credits
   }
 
