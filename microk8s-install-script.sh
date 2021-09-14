@@ -21,6 +21,28 @@ microk8s.kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/a
 microk8s.kubectl patch deploy argocd-server -n argocd -p '[{"op": "add", "path": "/spec/template/spec/containers/0/command/-", "value": "--disable-auth"}]' --type json
 microk8s.kubectl create namespace bootstrap
 echo <<EOF | microk8s.kubectl apply -n argocd
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: argocd-server-http-ingress
+  namespace: argocd
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+spec:
+  rules:
+  - http:
+      paths:
+      - backend:
+          serviceName: argocd-server
+          servicePort: http
+    host: argocd.kronicle.tech
+  tls:
+  - hosts:
+    - argocd.kronicle.tech
+    secretName: argocd-secret # do not change, this is provided by Argo CD
+---
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -34,7 +56,7 @@ spec:
 
   # Source of the application manifests
   source:
-    repoURL: https://github.com/kronicle-tech/kronicle-argo-cd-config.git
+    repoURL: https://github.com/kronicle-tech/kronicle-argocd-config.git
     targetRevision: HEAD
     path: bootstrap
 
