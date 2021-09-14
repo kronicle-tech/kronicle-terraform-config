@@ -18,6 +18,7 @@ ufw default allow routed
 # Install Argo CD
 microk8s.kubectl create namespace argocd
 microk8s.kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+microk8s.kubectl patch deploy argocd-server -n argocd -p '[{"op": "add", "path": "/spec/template/spec/containers/0/command/-", "value": "--insecure"}]' --type json
 microk8s.kubectl patch deploy argocd-server -n argocd -p '[{"op": "add", "path": "/spec/template/spec/containers/0/command/-", "value": "--disable-auth"}]' --type json
 microk8s.kubectl create namespace bootstrap
 echo <<EOF | microk8s.kubectl apply -n argocd
