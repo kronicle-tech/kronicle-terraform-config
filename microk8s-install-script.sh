@@ -1,4 +1,4 @@
-#! /usr/bin/bash
+#!/bin/bash
 
 set -e
 
@@ -10,7 +10,7 @@ sysctl -w net.ipv6.conf.lo.disable_ipv6=1
 # Install microk8s
 snap install microk8s --classic --channel=1.22/stable
 microk8s status --wait-ready
-microk8s enable dns
+microk8s enable dns ingress
 
 ufw allow in on cni0 && ufw allow out on cni0
 ufw default allow routed
