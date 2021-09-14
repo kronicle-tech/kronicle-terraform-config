@@ -30,7 +30,7 @@ variable "wireguard_cpu_credits" {
 
 variable "wireguard_peer_cidr_blocks" {
   description = "Public CIDR blocks for WireGuard peers"
-  default = ["1.2.3.4"]
+  default = ["1.2.3.4/32"]
 }
 
 variable "wireguard_address" {
