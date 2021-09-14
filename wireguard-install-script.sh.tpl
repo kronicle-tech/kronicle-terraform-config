@@ -16,7 +16,7 @@ PostDown = iptables -D FORWARD -i %i -j ACCEPT; iptables -D FORWARD -o %i -j ACC
 %{ for peer in peers ~}
 [Peer]
 PublicKey = ${peer.public_key}
-AllowedIPs = ${peer.address}
+AllowedIPs = ${peer.allowed_ips}
 PersistentKeepalive = 25
 %{ endfor ~}
 EOF
