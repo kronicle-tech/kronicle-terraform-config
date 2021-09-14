@@ -66,7 +66,7 @@ resource "aws_security_group" "wireguard_public_internet" {
   vpc_id      = aws_vpc.demo.id
 
   tags = {
-    Name       = "wireguard_public_internet"
+    Name                 = "wireguard_public_internet"
     "kronicle:terraform" = "true"
   }
 
@@ -90,7 +90,7 @@ resource "aws_security_group" "wireguard_internal" {
   vpc_id      = aws_vpc.demo.id
 
   tags = {
-    Name       = "wireguard_internal"
+    Name                 = "wireguard_internal"
     "kronicle:terraform" = "true"
   }
 
@@ -142,11 +142,36 @@ resource "aws_instance" "wireguard" {
   })
 }
 
+resource "aws_security_group" "microk8s_public_subnet" {
+  description = "Allow traffic from other private IP addresses in public subnet"
+  vpc_id      = aws_vpc.demo.id
+
+  tags = {
+    Name                 = "microk8s_public_subnet"
+    "kronicle:terraform" = "true"
+  }
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = [var.public_subnet_cidr_block]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
 resource "aws_instance" "microk8s" {
-  ami               = data.aws_ami.ubuntu.id
-  availability_zone = var.public_subnet_az
-  subnet_id         = aws_subnet.public.id
-  instance_type     = var.microk8s_instance_type
+  ami                    = data.aws_ami.ubuntu.id
+  availability_zone      = var.public_subnet_az
+  subnet_id              = aws_subnet.public.id
+  instance_type          = var.microk8s_instance_type
+  vpc_security_group_ids = [aws_security_group.microk8s_public_subnet.id]
 
   credit_specification {
     cpu_credits = var.microk8s_cpu_credits
