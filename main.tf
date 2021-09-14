@@ -136,7 +136,7 @@ resource "aws_instance" "wireguard" {
   }
 
   user_data = templatefile("${path.cwd}/wireguard-install-script.sh.tpl", {
-    cidr_block = var.wireguard_cidr_block,
+    address = var.wireguard_address,
     port = var.wireguard_port,
     private_key = var.wireguard_private_key,
     peers = var.wireguard_peers

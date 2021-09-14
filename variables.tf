@@ -28,8 +28,8 @@ variable "wireguard_cpu_credits" {
   default = "standard"
 }
 
-variable "wireguard_cidr_block" {
-  description = "WireGuard CIDR block"
+variable "wireguard_address" {
+  description = "WireGuard server address"
   default = "10.2.0.0/24"
 }
 

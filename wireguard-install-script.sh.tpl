@@ -7,7 +7,7 @@ apt-get install -y wireguard
 
 cat > /etc/wireguard/wg0.conf <<- EOF
 [Interface]
-Address = ${cidr_block}
+Address = ${address}
 ListenPort = ${port}
 PrivateKey = ${private_key}
 PostUp   = iptables -A FORWARD -i %i -j ACCEPT; iptables -A FORWARD -o %i -j ACCEPT; iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
@@ -16,7 +16,7 @@ PostDown = iptables -D FORWARD -i %i -j ACCEPT; iptables -D FORWARD -o %i -j ACC
 %{ for peer in peers ~}
 [Peer]
 PublicKey = ${peer.public_key}
-AllowedIPs = ${peer.address}
+AllowedIPs = ${peer.allowed_ips}
 PersistentKeepalive = 25
 %{ endfor ~}
 EOF
