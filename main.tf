@@ -113,11 +113,6 @@ resource "aws_iam_policy" "cloudwatch_logging" {
 }
 
 resource "aws_iam_policy_attachment" "ec2_cloudwatch_logging" {
-  tags = {
-    Name = "ec2_cloudwatch_logging"
-    "kronicle:terraform" = "true"
-  }
-
   name       = "ec2_cloudwatch_logging"
   roles      = [aws_iam_role.ec2_cloudwatch_logging.name]
   policy_arn = aws_iam_policy.cloudwatch_logging.arn
