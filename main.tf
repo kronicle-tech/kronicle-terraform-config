@@ -193,11 +193,9 @@ resource "aws_launch_template" "wireguard" {
     }
   }
 
-  name                   = "wireguard"
-  image_id               = data.aws_ami.ubuntu.id
-  instance_type          = var.wireguard_instance_type
-  vpc_security_group_ids = [
-    aws_security_group.wireguard_public_internet.id, aws_security_group.wireguard_internal.id]
+  name          = "wireguard"
+  image_id      = data.aws_ami.ubuntu.id
+  instance_type = var.wireguard_instance_type
 
   iam_instance_profile {
     name = aws_iam_instance_profile.cloudwatch_logging.name
@@ -210,6 +208,10 @@ resource "aws_launch_template" "wireguard" {
   network_interfaces {
     subnet_id                   = aws_subnet.public.id
     associate_public_ip_address = true
+    security_groups             = [
+      aws_security_group.wireguard_public_internet.id,
+      aws_security_group.wireguard_internal.id
+    ]
   }
 
   credit_specification {
@@ -283,10 +285,9 @@ resource "aws_launch_template" "microk8s" {
     }
   }
 
-  name                   = "microk8s"
-  image_id               = data.aws_ami.ubuntu.id
-  instance_type          = var.microk8s_instance_type
-  vpc_security_group_ids = [aws_security_group.microk8s_public_subnet.id]
+  name          = "microk8s"
+  image_id      = data.aws_ami.ubuntu.id
+  instance_type = var.microk8s_instance_type
 
   iam_instance_profile {
     name = aws_iam_instance_profile.cloudwatch_logging.name
@@ -297,7 +298,8 @@ resource "aws_launch_template" "microk8s" {
   }
 
   network_interfaces {
-    subnet_id              = aws_subnet.public.id
+    subnet_id       = aws_subnet.public.id
+    security_groups = [aws_security_group.microk8s_public_subnet.id]
   }
 
   credit_specification {
