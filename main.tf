@@ -216,13 +216,13 @@ resource "aws_launch_template" "wireguard" {
     cpu_credits = var.wireguard_cpu_credits
   }
 
-  user_data = templatefile("${path.cwd}/wireguard-install-script.sh.tpl", {
+  user_data = base64encode(templatefile("${path.cwd}/wireguard-install-script.sh.tpl", {
     aws_region = var.aws_region
     address = var.wireguard_address
     listen_port = var.wireguard_listen_port
     private_key = var.wireguard_private_key
     peers = var.wireguard_peers
-  })
+  }))
 }
 
 resource "aws_autoscaling_group" "wireguard" {
@@ -304,10 +304,10 @@ resource "aws_launch_template" "microk8s" {
     cpu_credits = var.microk8s_cpu_credits
   }
 
-  user_data = templatefile("${path.cwd}/microk8s-install-script.sh.tpl", {
+  user_data = base64encode(templatefile("${path.cwd}/microk8s-install-script.sh.tpl", {
     internal_domain = var.internal_domain
     aws_region = var.aws_region
-  })
+  }))
 }
 
 resource "aws_autoscaling_group" "microk8s" {
