@@ -1,3 +1,7 @@
+variable "internal_domain" {
+  description = "Private DNS domain for VPC"
+}
+
 variable "aws_region" {
   description = "AWS region"
   default = "us-west-1"

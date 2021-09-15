@@ -21,7 +21,7 @@ $ multipass exec microk8s bash
 ubuntu@microk8s:~$ sudo bash
 root@microk8s:/home/ubuntu# vim user-data # Copy and paste the user-data script into vim
 root@microk8s:/home/ubuntu# chmod +x user-data 
-root@microk8s:/home/ubuntu# ./user-data
+root@microk8s:/home/ubuntu# aws_region=eu-west-1 ./user-data
 root@microk8s:/home/ubuntu# exit
 ubuntu@microk8s:~$ exit
 $ multipass delete microk8s
