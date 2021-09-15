@@ -1,68 +1,69 @@
 variable "internal_domain" {
   description = "Private DNS domain for VPC"
+  # example = "example.com"
 }
 
 variable "aws_region" {
   description = "AWS region"
-  default = "us-west-1"
+  # example = "eu-west-1"
 }
 
 variable "vpc_cidr_block" {
   description = "AWS VPC CIDR block"
-  default = "10.0.0.0/16"
+  # example = "10.0.0.0/16"
 }
 
 variable "public_subnet_cidr_block" {
   description = "AWS public subnet CIDR block"
-  default = "10.1.0.0/24"
+  # example = "10.1.0.0/24"
 }
 
 variable "public_subnet_az" {
   description = "AWS VPC availability zone (AZ)"
-  default = "us-west-1a"
+  # example = "eu-west-1a"
 }
 
 variable "wireguard_instance_type" {
   description = "Type of EC2 instance to provision"
-  default = "t2.micro"
+  # example = "t2.micro"
 }
 
 variable "wireguard_cpu_credits" {
   description = "Credit option for CPU usage"
-  default = "standard"
+  # example = "standard"
 }
 
 variable "wireguard_peer_cidr_blocks" {
   description = "Public CIDR blocks for WireGuard peers"
-  default = ["1.2.3.4/32"]
+  # example = ["1.2.3.4/32"]
 }
 
 variable "wireguard_address" {
   description = "WireGuard server address"
-  default = "10.2.0.0/24"
+  # example = "10.2.1.1/32"
 }
 
 variable "wireguard_listen_port" {
   description = "WireGuard UDP port"
-  default = 1234
+  # example = 1234
 }
 
 variable "wireguard_private_key" {
   description = "WireGuard private key"
-  default = "change-me"
+  # example = "do-not-use-this-value"
 }
 
 variable "wireguard_peers" {
   description = "WireGuard VPN peers"
-  default = []
+  # example = [{ public_key = "do-not-use-this-value", allowed_ips = "10.2.1.2/32" }]
 }
 
 variable "microk8s_instance_type" {
   description = "Type of EC2 instance to provision"
-  default = "t2.micro"
+  # example = "t2.micro"
 }
 
 variable "microk8s_cpu_credits" {
   description = "Credit option for CPU usage"
-  default = "standard"
+  # example = "standard"
 }
