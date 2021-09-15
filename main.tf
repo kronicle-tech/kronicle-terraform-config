@@ -135,9 +135,10 @@ resource "aws_instance" "wireguard" {
   }
 
   user_data = templatefile("${path.cwd}/wireguard-install-script.sh.tpl", {
-    address = var.wireguard_address,
-    listen_port = var.wireguard_listen_port,
-    private_key = var.wireguard_private_key,
+    aws_region = var.aws_region
+    address = var.wireguard_address
+    listen_port = var.wireguard_listen_port
+    private_key = var.wireguard_private_key
     peers = var.wireguard_peers
   })
 }
@@ -149,6 +150,13 @@ resource "aws_security_group" "microk8s_public_subnet" {
   tags = {
     Name                 = "microk8s_public_subnet"
     "kronicle:terraform" = "true"
+  }
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = [var.public_subnet_cidr_block]
   }
 
   ingress {
@@ -182,5 +190,5 @@ resource "aws_instance" "microk8s" {
     "kronicle:terraform" = "true"
   }
 
-  user_data = file("${path.cwd}/microk8s-install-script.sh")
+  user_data = templatefile("${path.cwd}/microk8s-install-script.sh.tpl", { internal_domain = var.internal_domain, aws_region = var.aws_region })
 }
