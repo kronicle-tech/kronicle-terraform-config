@@ -324,6 +324,7 @@ resource "aws_launch_template" "microk8s" {
 
   network_interfaces {
     subnet_id       = aws_subnet.public.id
+    associate_public_ip_address = true
     security_groups = [
       aws_security_group.ssh_public_subnet.id,
       aws_security_group.microk8s_public_subnet.id
