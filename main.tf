@@ -66,6 +66,11 @@ data "aws_ami" "ubuntu" {
   owners = ["099720109477"] # Canonical
 }
 
+resource "aws_key_pair" "main" {
+  key_name   = "main"
+  public_key = var.key_pair_public_key
+}
+
 resource "aws_iam_role" "ec2_cloudwatch_logging" {
   tags = {
     Name = "ec2_cloudwatch_logging"
@@ -196,6 +201,7 @@ resource "aws_launch_template" "wireguard" {
   name          = "wireguard"
   image_id      = data.aws_ami.ubuntu.id
   instance_type = var.wireguard_instance_type
+  key_name      = aws_key_pair.main.key_name
 
   iam_instance_profile {
     name = aws_iam_instance_profile.cloudwatch_logging.name
@@ -288,6 +294,7 @@ resource "aws_launch_template" "microk8s" {
   name          = "microk8s"
   image_id      = data.aws_ami.ubuntu.id
   instance_type = var.microk8s_instance_type
+  key_name      = aws_key_pair.main.key_name
 
   iam_instance_profile {
     name = aws_iam_instance_profile.cloudwatch_logging.name
