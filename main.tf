@@ -5,7 +5,7 @@ provider "aws" {
 resource "aws_vpc" "demo" {
   tags = {
     Name = "demo"
-    "kronicle:terraform" = "true"
+    terraform = "true"
   }
 
   cidr_block = var.vpc_cidr_block
@@ -14,7 +14,7 @@ resource "aws_vpc" "demo" {
 resource "aws_subnet" "public" {
   tags = {
     Name = "public"
-    "kronicle:terraform" = "true"
+    terraform = "true"
   }
 
   vpc_id = aws_vpc.demo.id
@@ -25,7 +25,7 @@ resource "aws_subnet" "public" {
 resource "aws_internet_gateway" "main" {
   tags = {
     Name = "main"
-    "kronicle:terraform" = "true"
+    terraform = "true"
   }
 
   vpc_id = aws_vpc.demo.id
@@ -34,7 +34,7 @@ resource "aws_internet_gateway" "main" {
 resource "aws_default_route_table" "default" {
   tags = {
     Name = "default"
-    "kronicle:terraform" = "true"
+    terraform = "true"
   }
 
   default_route_table_id = aws_vpc.demo.default_route_table_id
@@ -48,7 +48,7 @@ resource "aws_default_route_table" "default" {
 data "aws_ami" "ubuntu" {
   tags = {
     Name = "ubuntu"
-    "kronicle:terraform" = "true"
+    terraform = "true"
   }
 
   most_recent = true
@@ -69,7 +69,7 @@ data "aws_ami" "ubuntu" {
 resource "aws_iam_role" "ec2_cloudwatch_logging" {
   tags = {
     Name = "ec2_cloudwatch_logging"
-    "kronicle:terraform" = "true"
+    terraform = "true"
   }
 
   name               = "cloudwatch_logging"
@@ -126,7 +126,7 @@ resource "aws_iam_instance_profile" "cloudwatch_logging" {
 resource "aws_security_group" "wireguard_public_internet" {
   tags = {
     Name                 = "wireguard_public_internet"
-    "kronicle:terraform" = "true"
+    terraform = "true"
   }
 
   description = "Allow traffic from internet from WireGuard peers"
@@ -150,7 +150,7 @@ resource "aws_security_group" "wireguard_public_internet" {
 resource "aws_security_group" "wireguard_internal" {
   tags = {
     Name                 = "wireguard_internal"
-    "kronicle:terraform" = "true"
+    terraform = "true"
   }
 
   description = "Allow traffic to internal resources from Wireguard peers"
@@ -181,12 +181,16 @@ resource "aws_security_group" "wireguard_internal" {
 resource "aws_launch_template" "wireguard" {
   tags = {
     Name = "wireguard"
-    "kronicle:terraform" = "true"
+    terraform = "true"
   }
 
-  tag_specifications = {
-    Name = "wireguard"
-    "kronicle:terraform" = "true"
+  tag_specifications {
+    resource_type = "instance"
+
+    tags {
+      Name = "microk8s"
+      terraform = "true"
+    }
   }
 
   name                   = "wireguard"
@@ -233,7 +237,7 @@ resource "aws_autoscaling_group" "wireguard" {
 resource "aws_security_group" "microk8s_public_subnet" {
   tags = {
     Name                 = "microk8s_public_subnet"
-    "kronicle:terraform" = "true"
+    terraform = "true"
   }
 
   description = "Allow traffic from other private IP addresses in public subnet"
@@ -264,12 +268,16 @@ resource "aws_security_group" "microk8s_public_subnet" {
 resource "aws_launch_template" "microk8s" {
   tags = {
     Name = "microk8s"
-    "kronicle:terraform" = "true"
+    terraform = "true"
   }
 
-  tag_specifications = {
-    Name = "microk8s"
-    "kronicle:terraform" = "true"
+  tag_specifications {
+    resource_type = "instance"
+    
+    tags {
+      Name = "microk8s"
+      terraform = "true"
+    }
   }
 
   name                   = "microk8s"
