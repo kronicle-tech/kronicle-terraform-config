@@ -23,6 +23,11 @@ variable "public_subnet_az" {
   # example = "eu-west-1a"
 }
 
+variable "key_pair_public_key" {
+  description = "SSH public key"
+  # example = "ssh-ed25519 1234 example@example.com
+}
+
 variable "wireguard_instance_type" {
   description = "Type of EC2 instance to provision"
   # example = "t2.micro"
