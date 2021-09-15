@@ -128,9 +128,26 @@ resource "aws_iam_instance_profile" "cloudwatch_logging" {
   role = aws_iam_role.ec2_cloudwatch_logging.name
 }
 
+resource "aws_security_group" "ssh_public_subnet" {
+  tags = {
+    Name      = "ssh_public_subnet"
+    terraform = "true"
+  }
+
+  description = "Allow instances in public subnet to connect to SSH port"
+  vpc_id      = aws_vpc.demo.id
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = [var.public_subnet_cidr_block]
+  }
+}
+
 resource "aws_security_group" "wireguard_public_internet" {
   tags = {
-    Name                 = "wireguard_public_internet"
+    Name      = "wireguard_public_internet"
     terraform = "true"
   }
 
@@ -154,7 +171,7 @@ resource "aws_security_group" "wireguard_public_internet" {
 
 resource "aws_security_group" "wireguard_internal" {
   tags = {
-    Name                 = "wireguard_internal"
+    Name      = "wireguard_internal"
     terraform = "true"
   }
 
@@ -215,6 +232,7 @@ resource "aws_launch_template" "wireguard" {
     subnet_id                   = aws_subnet.public.id
     associate_public_ip_address = true
     security_groups             = [
+      aws_security_group.ssh_public_subnet.id,
       aws_security_group.wireguard_public_internet.id,
       aws_security_group.wireguard_internal.id
     ]
@@ -247,7 +265,7 @@ resource "aws_autoscaling_group" "wireguard" {
 
 resource "aws_security_group" "microk8s_public_subnet" {
   tags = {
-    Name                 = "microk8s_public_subnet"
+    Name      = "microk8s_public_subnet"
     terraform = "true"
   }
 
@@ -306,7 +324,10 @@ resource "aws_launch_template" "microk8s" {
 
   network_interfaces {
     subnet_id       = aws_subnet.public.id
-    security_groups = [aws_security_group.microk8s_public_subnet.id]
+    security_groups = [
+      aws_security_group.ssh_public_subnet.id,
+      aws_security_group.microk8s_public_subnet.id
+    ]
   }
 
   credit_specification {
