@@ -83,12 +83,12 @@ EOF
 
 echo '# Deploying bootstrap Argo CD app'
 microk8s.kubectl create namespace bootstrap
-cat <<EOF | microk8s.kubectl apply -n bootstrap -f -
+cat <<EOF | microk8s.kubectl apply -n argocd -f -
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: bootstrap
-  namespace: bootstrap
+  namespace: argocd
   # Add a this finalizer ONLY if you want these to cascade delete.
   finalizers:
     - resources-finalizer.argocd.argoproj.io
