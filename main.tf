@@ -187,7 +187,7 @@ resource "aws_launch_template" "wireguard" {
   tag_specifications {
     resource_type = "instance"
 
-    tags {
+    tags = {
       Name = "microk8s"
       terraform = "true"
     }
@@ -195,13 +195,16 @@ resource "aws_launch_template" "wireguard" {
 
   name                   = "wireguard"
   image_id               = data.aws_ami.ubuntu.id
-  availability_zone      = var.public_subnet_az
   instance_type          = var.wireguard_instance_type
   vpc_security_group_ids = [
     aws_security_group.wireguard_public_internet.id, aws_security_group.wireguard_internal.id]
 
   iam_instance_profile {
     name = aws_iam_instance_profile.cloudwatch_logging.name
+  }
+
+  placement {
+    availability_zone = var.public_subnet_az
   }
 
   network_interfaces {
@@ -274,7 +277,7 @@ resource "aws_launch_template" "microk8s" {
   tag_specifications {
     resource_type = "instance"
     
-    tags {
+    tags = {
       Name = "microk8s"
       terraform = "true"
     }
@@ -282,12 +285,15 @@ resource "aws_launch_template" "microk8s" {
 
   name                   = "microk8s"
   image_id               = data.aws_ami.ubuntu.id
-  availability_zone      = var.public_subnet_az
   instance_type          = var.microk8s_instance_type
   vpc_security_group_ids = [aws_security_group.microk8s_public_subnet.id]
 
   iam_instance_profile {
     name = aws_iam_instance_profile.cloudwatch_logging.name
+  }
+
+  placement {
+    availability_zone = var.public_subnet_az
   }
 
   network_interfaces {
