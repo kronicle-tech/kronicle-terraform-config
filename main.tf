@@ -189,15 +189,21 @@ resource "aws_launch_template" "wireguard" {
     "kronicle:terraform" = "true"
   }
 
-  name                        = "wireguard"
-  ami                         = data.aws_ami.ubuntu.id
-  availability_zone           = var.public_subnet_az
-  subnet_id                   = aws_subnet.public.id
-  instance_type               = var.wireguard_instance_type
-  associate_public_ip_address = true
-  iam_instance_profile        = aws_iam_instance_profile.cloudwatch_logging.name
-  vpc_security_group_ids      = [
+  name                   = "wireguard"
+  image_id               = data.aws_ami.ubuntu.id
+  availability_zone      = var.public_subnet_az
+  instance_type          = var.wireguard_instance_type
+  vpc_security_group_ids = [
     aws_security_group.wireguard_public_internet.id, aws_security_group.wireguard_internal.id]
+
+  iam_instance_profile {
+    name = aws_iam_instance_profile.cloudwatch_logging.name
+  }
+
+  network_interfaces {
+    subnet_id                   = aws_subnet.public.id
+    associate_public_ip_address = true
+  }
 
   credit_specification {
     cpu_credits = var.wireguard_cpu_credits
@@ -267,12 +273,18 @@ resource "aws_launch_template" "microk8s" {
   }
 
   name                   = "microk8s"
-  ami                    = data.aws_ami.ubuntu.id
+  image_id               = data.aws_ami.ubuntu.id
   availability_zone      = var.public_subnet_az
-  subnet_id              = aws_subnet.public.id
   instance_type          = var.microk8s_instance_type
-  iam_instance_profile   = aws_iam_instance_profile.cloudwatch_logging.name
   vpc_security_group_ids = [aws_security_group.microk8s_public_subnet.id]
+
+  iam_instance_profile {
+    name = aws_iam_instance_profile.cloudwatch_logging.name
+  }
+
+  network_interfaces {
+    subnet_id              = aws_subnet.public.id
+  }
 
   credit_specification {
     cpu_credits = var.microk8s_cpu_credits
