@@ -9,8 +9,6 @@ exec 2>&1
 echo '# Starting user-data script'
 
 echo '# Installing CloudWatch agent'
-wget https://s3.${aws_region}.amazonaws.com/amazoncloudwatch-agent-${aws_region}/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb
-dpkg -i -E ./amazon-cloudwatch-agent.deb
 cat > /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json <<EOF
 {
    "logs":{
@@ -19,7 +17,7 @@ cat > /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json <<EOF
             "collect_list":[
                {
                   "file_path":"/var/log/user-data",
-                  "log_group_name":"wireguard",
+                  "log_group_name":"microk8s",
                   "log_stream_name":"{instance_id}/var/log/user-data"
                }
             ]
@@ -28,7 +26,8 @@ cat > /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json <<EOF
    }
 }
 EOF
-/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -s -c file:/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
+wget https://s3.${aws_region}.amazonaws.com/amazoncloudwatch-agent-${aws_region}/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb
+dpkg -i -E ./amazon-cloudwatch-agent.deb
 
 echo '# Disabling IPv6'
 sysctl -w net.ipv6.conf.all.disable_ipv6=1
@@ -84,12 +83,12 @@ EOF
 
 echo '# Deploying bootstrap Argo CD app'
 microk8s.kubectl create namespace bootstrap
-cat <<EOF | microk8s.kubectl apply -n bootstrap -f -
+cat <<EOF | microk8s.kubectl apply -n argocd -f -
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: bootstrap
-  namespace: bootstrap
+  namespace: argocd
   # Add a this finalizer ONLY if you want these to cascade delete.
   finalizers:
     - resources-finalizer.argocd.argoproj.io
