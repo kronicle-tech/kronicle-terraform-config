@@ -61,6 +61,58 @@ data "aws_ami" "ubuntu" {
   owners = ["099720109477"] # Canonical
 }
 
+resource "aws_iam_role" "ec2_cloudwatch_logging" {
+  name               = "cloudwatch_logging"
+  assume_role_policy = jsonencode({
+    "Version": "2012-10-17"
+    "Statement": [
+      {
+        "Action": "sts:AssumeRole"
+        "Principal": {
+          "Service": "ec2.amazonaws.com"
+        },
+        "Effect": "Allow"
+        "Sid": ""
+      }
+    ]
+  })
+}
+
+resource "aws_iam_policy" "cloudwatch_logging" {
+  name        = "cloudwatch_logging"
+  path        = "/"
+  description = "Allows sending logs to CloudWatch"
+
+  policy = jsonencode({
+    "Version": "2012-10-17"
+    "Statement": [
+      {
+        "Effect": "Allow"
+        "Action": [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents",
+          "logs:DescribeLogStreams"
+        ]
+        "Resource": [
+          "*"
+        ]
+      }
+    ]
+  })
+}
+
+resource "aws_iam_policy_attachment" "ec2_cloudwatch_logging" {
+  name       = "ec2_cloudwatch_logging"
+  roles      = [aws_iam_role.ec2_cloudwatch_logging.name]
+  policy_arn = aws_iam_policy.cloudwatch_logging.arn
+}
+
+resource "aws_iam_instance_profile" "cloudwatch_logging" {
+  name  = "cloudwatch_logging"
+  roles = [aws_iam_role.ec2_cloudwatch_logging.name]
+}
+
 resource "aws_security_group" "wireguard_public_internet" {
   description = "Allow traffic from internet from WireGuard peers"
   vpc_id      = aws_vpc.demo.id
@@ -122,6 +174,7 @@ resource "aws_instance" "wireguard" {
   subnet_id                   = aws_subnet.public.id
   instance_type               = var.wireguard_instance_type
   associate_public_ip_address = true
+  iam_instance_profile        = aws_iam_instance_profile.cloudwatch_logging.name
   vpc_security_group_ids      = [
     aws_security_group.wireguard_public_internet.id, aws_security_group.wireguard_internal.id]
 
@@ -179,6 +232,7 @@ resource "aws_instance" "microk8s" {
   availability_zone      = var.public_subnet_az
   subnet_id              = aws_subnet.public.id
   instance_type          = var.microk8s_instance_type
+  iam_instance_profile   = aws_iam_instance_profile.cloudwatch_logging.name
   vpc_security_group_ids = [aws_security_group.microk8s_public_subnet.id]
 
   credit_specification {
