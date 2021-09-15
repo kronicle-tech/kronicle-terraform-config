@@ -89,11 +89,6 @@ resource "aws_iam_role" "ec2_cloudwatch_logging" {
 }
 
 resource "aws_iam_policy" "cloudwatch_logging" {
-  tags = {
-    Name = "cloudwatch_logging"
-    "kronicle:terraform" = "true"
-  }
-
   name        = "cloudwatch_logging"
   path        = "/"
   description = "Allows sending logs to CloudWatch"
@@ -129,11 +124,6 @@ resource "aws_iam_policy_attachment" "ec2_cloudwatch_logging" {
 }
 
 resource "aws_iam_instance_profile" "cloudwatch_logging" {
-  tags = {
-    Name = "cloudwatch_logging"
-    "kronicle:terraform" = "true"
-  }
-
   name  = "cloudwatch_logging"
   role = aws_iam_role.ec2_cloudwatch_logging.name
 }
