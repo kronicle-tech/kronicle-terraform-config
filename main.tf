@@ -22,6 +22,54 @@ resource "aws_subnet" "public" {
   availability_zone = var.public_subnet_az
 }
 
+resource "aws_network_acl" "main" {
+  tags = {
+    Name = "main"
+    terraform = "true"
+  }
+
+  vpc_id = aws_vpc.demo.id
+  subnet_ids = [aws_subnet.public.id]
+
+  ingress = [
+    {
+      from_port  = var.wireguard_listen_port
+      to_port    = var.wireguard_listen_port
+      rule_no    = 100
+      action     = "allow"
+      protocol   = "-1"
+      cidr_block = "0.0.0.0/0"
+    },
+    {
+      from_port  = 80
+      to_port    = 80
+      rule_no    = 100
+      action     = "allow"
+      protocol   = "tcp"
+      cidr_block = "0.0.0.0/0"
+    },
+    {
+      from_port  = 443
+      to_port    = 443
+      rule_no    = 100
+      action     = "allow"
+      protocol   = "tcp"
+      cidr_block = "0.0.0.0/0"
+    }
+  ]
+
+  egress = [
+    {
+      from_port  = 0
+      to_port    = 0
+      rule_no    = 100
+      action     = "allow"
+      protocol   = "-1"
+      cidr_block = "0.0.0.0/0"
+    }
+  ]
+}
+
 resource "aws_internet_gateway" "main" {
   tags = {
     Name = "main"
