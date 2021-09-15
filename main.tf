@@ -50,7 +50,7 @@ data "aws_ami" "ubuntu" {
 
   filter {
     name   = "name"
-    values = ["ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"]
+    values = ["ubuntu/images/hvm-ssd/ubuntu-hirsute-21.04-amd64-server-*"]
   }
 
   filter {
@@ -190,5 +190,8 @@ resource "aws_instance" "microk8s" {
     "kronicle:terraform" = "true"
   }
 
-  user_data = templatefile("${path.cwd}/microk8s-install-script.sh.tpl", { internal_domain = var.internal_domain, aws_region = var.aws_region })
+  user_data = templatefile("${path.cwd}/microk8s-install-script.sh.tpl", {
+    internal_domain = var.internal_domain
+    aws_region = var.aws_region
+  })
 }
