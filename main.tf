@@ -188,7 +188,7 @@ resource "aws_launch_template" "wireguard" {
     resource_type = "instance"
 
     tags = {
-      Name = "microk8s"
+      Name = "wireguard"
       terraform = "true"
     }
   }
