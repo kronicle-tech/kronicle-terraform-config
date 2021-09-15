@@ -178,12 +178,18 @@ resource "aws_security_group" "wireguard_internal" {
   }
 }
 
-resource "aws_instance" "wireguard" {
+resource "aws_launch_template" "wireguard" {
   tags = {
     Name = "wireguard"
     "kronicle:terraform" = "true"
   }
 
+  tag_specifications = {
+    Name = "wireguard"
+    "kronicle:terraform" = "true"
+  }
+
+  name                        = "wireguard"
   ami                         = data.aws_ami.ubuntu.id
   availability_zone           = var.public_subnet_az
   subnet_id                   = aws_subnet.public.id
@@ -204,6 +210,18 @@ resource "aws_instance" "wireguard" {
     private_key = var.wireguard_private_key
     peers = var.wireguard_peers
   })
+}
+
+resource "aws_autoscaling_group" "wireguard" {
+  availability_zones = [var.public_subnet_az]
+  desired_capacity   = 1
+  max_size           = 1
+  min_size           = 1
+
+  launch_template {
+    id      = aws_launch_template.wireguard.id
+    version = "$Latest"
+  }
 }
 
 resource "aws_security_group" "microk8s_public_subnet" {
@@ -237,12 +255,18 @@ resource "aws_security_group" "microk8s_public_subnet" {
   }
 }
 
-resource "aws_instance" "microk8s" {
+resource "aws_launch_template" "microk8s" {
   tags = {
     Name = "microk8s"
     "kronicle:terraform" = "true"
   }
 
+  tag_specifications = {
+    Name = "microk8s"
+    "kronicle:terraform" = "true"
+  }
+
+  name                   = "microk8s"
   ami                    = data.aws_ami.ubuntu.id
   availability_zone      = var.public_subnet_az
   subnet_id              = aws_subnet.public.id
@@ -258,4 +282,16 @@ resource "aws_instance" "microk8s" {
     internal_domain = var.internal_domain
     aws_region = var.aws_region
   })
+}
+
+resource "aws_autoscaling_group" "microk8s" {
+  availability_zones = [var.public_subnet_az]
+  desired_capacity   = 1
+  max_size           = 1
+  min_size           = 1
+
+  launch_template {
+    id      = aws_launch_template.microk8s.id
+    version = "$Latest"
+  }
 }
