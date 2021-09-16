@@ -99,7 +99,6 @@ spec:
         cnameStrategy: Follow
         route53:
           region: ${aws_region}
-          hostedZoneID: ${hosted_zone_id}
           role: ${cert_manager_role}
 ---
 apiVersion: cert-manager.io/v1
