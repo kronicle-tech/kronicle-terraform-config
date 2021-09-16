@@ -263,6 +263,10 @@ resource "aws_autoscaling_group" "wireguard" {
   }
 }
 
+resource "aws_eip" "microk8s" {
+  vpc = true
+}
+
 resource "aws_security_group" "microk8s_public_subnet" {
   tags = {
     Name      = "microk8s_public_subnet"
@@ -338,6 +342,7 @@ resource "aws_launch_template" "microk8s" {
   user_data = base64encode(templatefile("${path.cwd}/microk8s-install-script.sh.tpl", {
     internal_domain = var.internal_domain
     aws_region = var.aws_region
+    microk8s_elastic_ip_id = aws_eip.microk8s.id
   }))
 }
 
