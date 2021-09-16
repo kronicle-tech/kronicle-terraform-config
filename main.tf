@@ -45,6 +45,47 @@ resource "aws_default_route_table" "default" {
   }
 }
 
+resource "aws_route53_zone" "internal_domain" {
+  tags = {
+    Name      = "internal_domain"
+    terraform = "true"
+  }
+
+  name = var.internal_domain
+}
+
+resource "aws_iam_role" "cert_manager" {
+  tags = {
+    Name      = "cert_manager"
+    terraform = "true"
+  }
+
+  name               = "cert_manager"
+  assume_role_policy = jsonencode({
+    "Version": "2012-10-17"
+    "Statement": [
+      {
+        "Effect": "Allow"
+        "Action": "route53:GetChange"
+        "Resource": "arn:aws:route53:::change/*"
+      },
+      {
+        "Effect": "Allow"
+        "Action": [
+          "route53:ChangeResourceRecordSets",
+          "route53:ListResourceRecordSets"
+        ]
+        "Resource": "arn:aws:route53:::hostedzone/*"
+      },
+      {
+        "Effect": "Allow"
+        "Action": "route53:ListHostedZonesByName"
+        "Resource": "*"
+      }
+    ]
+  })
+}
+
 data "aws_ami" "ubuntu" {
   tags = {
     Name = "ubuntu"
@@ -116,18 +157,6 @@ resource "aws_iam_role" "wireguard" {
       }
     ]
   })
-}
-
-resource "aws_iam_policy_attachment" "wireguard_cloudwatch_logging" {
-  name       = "wireguard_cloudwatch_logging"
-  roles      = [aws_iam_role.wireguard.name]
-  policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
-}
-
-resource "aws_iam_policy_attachment" "wireguard_elastic_ip" {
-  name       = "wireguard_elastic_ip"
-  roles      = [aws_iam_role.microk8s.name]
-  policy_arn = aws_iam_policy.associate_elastic_ip.arn
 }
 
 resource "aws_iam_instance_profile" "wireguard" {
@@ -275,6 +304,14 @@ resource "aws_eip" "microk8s" {
   vpc = true
 }
 
+resource "aws_route53_record" "argocd" {
+  zone_id = aws_route53_zone.internal_domain.zone_id
+  name    = "argocd"
+  type    = "A"
+  ttl     = "300"
+  records = [aws_eip.microk8s.private_ip]
+}
+
 resource "aws_iam_policy" "microk8s_elastic_ip" {
   name        = "microk8s_elastic_ip"
   path        = "/"
@@ -316,18 +353,6 @@ resource "aws_iam_role" "microk8s" {
       }
     ]
   })
-}
-
-resource "aws_iam_policy_attachment" "microk8s_cloudwatch_logging" {
-  name       = "microk8s_cloudwatch_logging"
-  roles      = [aws_iam_role.microk8s.name]
-  policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
-}
-
-resource "aws_iam_policy_attachment" "microk8s_elastic_ip" {
-  name       = "microk8s_elastic_ip"
-  roles      = [aws_iam_role.microk8s.name]
-  policy_arn = aws_iam_policy.associate_elastic_ip.arn
 }
 
 resource "aws_iam_instance_profile" "microk8s" {
@@ -411,6 +436,9 @@ resource "aws_launch_template" "microk8s" {
     internal_domain = var.internal_domain
     aws_region = var.aws_region
     elastic_ip_id = aws_eip.microk8s.id
+    letsencrypt_email_address = var.letsencrypt_email_address
+    hosted_zone_id = aws_route53_zone.internal_domain.zone_id
+    cert_manager_role = aws_iam_role.cert_manager.arn
     argocd_ip_allowlist = var.argocd_ip_allowlist
   }))
 }
@@ -425,4 +453,16 @@ resource "aws_autoscaling_group" "microk8s" {
     id      = aws_launch_template.microk8s.id
     version = "$Latest"
   }
+}
+
+resource "aws_iam_policy_attachment" "cloudwatch_logging" {
+  name       = "cloudwatch_logging"
+  roles      = [aws_iam_role.wireguard.name, aws_iam_role.microk8s.name]
+  policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
+}
+
+resource "aws_iam_policy_attachment" "elastic_ip" {
+  name       = "elastic_ip"
+  roles      = [aws_iam_role.wireguard.name, aws_iam_role.microk8s.name]
+  policy_arn = aws_iam_policy.associate_elastic_ip.arn
 }
