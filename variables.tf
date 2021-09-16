@@ -3,6 +3,11 @@ variable "internal_domain" {
   # example = "example.com"
 }
 
+variable "letsencrypt_email_address" {
+  description = "Email address for emails from Let's Encrypt"
+  # example = "example@example.com"
+}
+
 variable "aws_region" {
   description = "AWS region"
   # example = "eu-west-1"
