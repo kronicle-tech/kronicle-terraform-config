@@ -34,6 +34,9 @@ sysctl -w net.ipv6.conf.all.disable_ipv6=1
 sysctl -w net.ipv6.conf.default.disable_ipv6=1
 sysctl -w net.ipv6.conf.lo.disable_ipv6=1
 
+echo '# Associate Elastic IP'
+aws ec2 associate-address --instance-id "$(wget -q -O - http://169.254.169.254/latest/meta-data/instance-id)" --allocation-id ${microk8s_elastic_ip_id}
+
 echo '# Installing microk8s'
 snap install microk8s --classic --channel=1.22/stable
 echo '# Waiting for microk8s to be ready'
