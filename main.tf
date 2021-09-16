@@ -71,28 +71,6 @@ resource "aws_key_pair" "main" {
   public_key = var.key_pair_public_key
 }
 
-resource "aws_iam_role" "ec2_cloudwatch_logging" {
-  tags = {
-    Name = "ec2_cloudwatch_logging"
-    terraform = "true"
-  }
-
-  name               = "cloudwatch_logging"
-  assume_role_policy = jsonencode({
-    "Version": "2012-10-17"
-    "Statement": [
-      {
-        "Action": "sts:AssumeRole"
-        "Principal": {
-          "Service": "ec2.amazonaws.com"
-        },
-        "Effect": "Allow"
-        "Sid": ""
-      }
-    ]
-  })
-}
-
 resource "aws_iam_policy" "cloudwatch_logging" {
   name        = "cloudwatch_logging"
   path        = "/"
@@ -117,15 +95,37 @@ resource "aws_iam_policy" "cloudwatch_logging" {
   })
 }
 
-resource "aws_iam_policy_attachment" "ec2_cloudwatch_logging" {
-  name       = "ec2_cloudwatch_logging"
-  roles      = [aws_iam_role.ec2_cloudwatch_logging.name]
+resource "aws_iam_role" "wireguard" {
+  tags = {
+    Name      = "wireguard"
+    terraform = "true"
+  }
+
+  name               = "wireguard"
+  assume_role_policy = jsonencode({
+    "Version": "2012-10-17"
+    "Statement": [
+      {
+        "Action": "sts:AssumeRole"
+        "Principal": {
+          "Service": "ec2.amazonaws.com"
+        },
+        "Effect": "Allow"
+        "Sid": ""
+      }
+    ]
+  })
+}
+
+resource "aws_iam_policy_attachment" "wireguard_cloudwatch_logging" {
+  name       = "wireguard_cloudwatch_logging"
+  roles      = [aws_iam_role.wireguard.name]
   policy_arn = aws_iam_policy.cloudwatch_logging.arn
 }
 
-resource "aws_iam_instance_profile" "cloudwatch_logging" {
-  name  = "cloudwatch_logging"
-  role = aws_iam_role.ec2_cloudwatch_logging.name
+resource "aws_iam_instance_profile" "wireguard" {
+  name  = "wireguard"
+  role = aws_iam_role.wireguard.name
 }
 
 resource "aws_security_group" "ssh_public_subnet" {
@@ -221,7 +221,7 @@ resource "aws_launch_template" "wireguard" {
   key_name      = aws_key_pair.main.key_name
 
   iam_instance_profile {
-    name = aws_iam_instance_profile.cloudwatch_logging.name
+    name = aws_iam_instance_profile.wireguard.name
   }
 
   placement {
@@ -265,6 +265,66 @@ resource "aws_autoscaling_group" "wireguard" {
 
 resource "aws_eip" "microk8s" {
   vpc = true
+}
+
+resource "aws_iam_policy" "microk8s_elastic_ip" {
+  name        = "microk8s_elastic_ip"
+  path        = "/"
+  description = "Allows associating an Elastic IP with an EC2 instance"
+
+  policy = jsonencode({
+    "Version": "2012-10-17"
+    "Statement": [
+      {
+        "Effect": "Allow"
+        "Action": [
+          "ec2:AssociateAddress"
+        ]
+        "Resource": [
+          "*"
+        ]
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role" "microk8s" {
+  tags = {
+    Name = "microk8s"
+    terraform = "true"
+  }
+
+  name               = "microk8s"
+  assume_role_policy = jsonencode({
+    "Version": "2012-10-17"
+    "Statement": [
+      {
+        "Action": "sts:AssumeRole"
+        "Principal": {
+          "Service": "ec2.amazonaws.com"
+        },
+        "Effect": "Allow"
+        "Sid": ""
+      }
+    ]
+  })
+}
+
+resource "aws_iam_policy_attachment" "microk8s_cloudwatch_logging" {
+  name       = "microk8s_cloudwatch_logging"
+  roles      = [aws_iam_role.microk8s.name]
+  policy_arn = aws_iam_policy.cloudwatch_logging.arn
+}
+
+resource "aws_iam_policy_attachment" "microk8s_elastic_ip" {
+  name       = "microk8s_elastic_ip"
+  roles      = [aws_iam_role.microk8s.name]
+  policy_arn = aws_iam_policy.microk8s_elastic_ip.arn
+}
+
+resource "aws_iam_instance_profile" "microk8s" {
+  name  = "microk8s"
+  role = aws_iam_role.microk8s.name
 }
 
 resource "aws_security_group" "microk8s_public_subnet" {
@@ -319,7 +379,7 @@ resource "aws_launch_template" "microk8s" {
   key_name      = aws_key_pair.main.key_name
 
   iam_instance_profile {
-    name = aws_iam_instance_profile.cloudwatch_logging.name
+    name = aws_iam_instance_profile.microk8s.name
   }
 
   placement {
