@@ -8,6 +8,23 @@ exec 2>&1
 
 echo '# Starting user-data script'
 
+echo '# Updating packages metadata'
+apt-get update -y
+
+echo '# Installing AWS CLI'
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+apt-get install -y unzip
+unzip awscliv2.zip
+sudo ./aws/install
+
+echo '# Disabling IPv6'
+sysctl -w net.ipv6.conf.all.disable_ipv6=1
+sysctl -w net.ipv6.conf.default.disable_ipv6=1
+sysctl -w net.ipv6.conf.lo.disable_ipv6=1
+
+echo '# Associate Elastic IP'
+aws ec2 associate-address --instance-id "$(wget -q -O - http://169.254.169.254/latest/meta-data/instance-id)" --allocation-id ${elastic_ip_id}
+
 echo '# Installing CloudWatch agent'
 wget https://s3.${aws_region}.amazonaws.com/amazoncloudwatch-agent-${aws_region}/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb
 dpkg -i -E ./amazon-cloudwatch-agent.deb
@@ -29,23 +46,6 @@ cat > /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json <<EOF
 }
 EOF
 /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json -s
-
-echo '# Updating packages metadata'
-apt-get update -y
-
-echo '# Installing AWS CLI'
-curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-apt-get install -y unzip
-unzip awscliv2.zip
-sudo ./aws/install
-
-echo '# Disabling IPv6'
-sysctl -w net.ipv6.conf.all.disable_ipv6=1
-sysctl -w net.ipv6.conf.default.disable_ipv6=1
-sysctl -w net.ipv6.conf.lo.disable_ipv6=1
-
-echo '# Associate Elastic IP'
-aws ec2 associate-address --instance-id "$(wget -q -O - http://169.254.169.254/latest/meta-data/instance-id)" --allocation-id ${microk8s_elastic_ip_id}
 
 echo '# Installing microk8s'
 snap install microk8s --classic --channel=1.22/stable
