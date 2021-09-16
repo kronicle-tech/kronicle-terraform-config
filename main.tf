@@ -71,6 +71,31 @@ resource "aws_key_pair" "main" {
   public_key = var.key_pair_public_key
 }
 
+resource "aws_iam_policy" "associate_elastic_ip" {
+  name        = "associate_elastic_ip"
+  path        = "/"
+  description = "Allows associating an Elastic IP with an EC2 instance"
+
+  policy = jsonencode({
+    "Version": "2012-10-17"
+    "Statement": [
+      {
+        "Effect": "Allow"
+        "Action": [
+          "ec2:AssociateAddress"
+        ]
+        "Resource": [
+          "*"
+        ]
+      }
+    ]
+  })
+}
+
+resource "aws_eip" "wireguard" {
+  vpc = true
+}
+
 resource "aws_iam_role" "wireguard" {
   tags = {
     Name      = "wireguard"
@@ -97,6 +122,12 @@ resource "aws_iam_policy_attachment" "wireguard_cloudwatch_logging" {
   name       = "wireguard_cloudwatch_logging"
   roles      = [aws_iam_role.wireguard.name]
   policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
+}
+
+resource "aws_iam_policy_attachment" "wireguard_elastic_ip" {
+  name       = "wireguard_elastic_ip"
+  roles      = [aws_iam_role.microk8s.name]
+  policy_arn = aws_iam_policy.associate_elastic_ip.arn
 }
 
 resource "aws_iam_instance_profile" "wireguard" {
@@ -220,6 +251,7 @@ resource "aws_launch_template" "wireguard" {
 
   user_data = base64encode(templatefile("${path.cwd}/wireguard-install-script.sh.tpl", {
     aws_region = var.aws_region
+    elastic_ip_id = aws_eip.wireguard.id
     address = var.wireguard_address
     listen_port = var.wireguard_listen_port
     private_key = var.wireguard_private_key
@@ -295,7 +327,7 @@ resource "aws_iam_policy_attachment" "microk8s_cloudwatch_logging" {
 resource "aws_iam_policy_attachment" "microk8s_elastic_ip" {
   name       = "microk8s_elastic_ip"
   roles      = [aws_iam_role.microk8s.name]
-  policy_arn = aws_iam_policy.microk8s_elastic_ip.arn
+  policy_arn = aws_iam_policy.associate_elastic_ip.arn
 }
 
 resource "aws_iam_instance_profile" "microk8s" {
@@ -378,7 +410,7 @@ resource "aws_launch_template" "microk8s" {
   user_data = base64encode(templatefile("${path.cwd}/microk8s-install-script.sh.tpl", {
     internal_domain = var.internal_domain
     aws_region = var.aws_region
-    microk8s_elastic_ip_id = aws_eip.microk8s.id
+    elastic_ip_id = aws_eip.microk8s.id
     argocd_ip_allowlist = var.argocd_ip_allowlist
   }))
 }
