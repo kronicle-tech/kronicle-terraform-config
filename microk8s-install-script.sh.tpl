@@ -71,7 +71,7 @@ microk8s.kubectl apply -f https://github.com/jetstack/cert-manager/releases/down
 echo '# Waiting for cert-manager to fully start'
 wget https://github.com/alenkacz/cert-manager-verifier/releases/download/v0.2.0/cert-manager-verifier_0.2.0_Linux_x86_64.tar.gz
 tar zxvf cert-manager-verifier_0.2.0_Linux_x86_64.tar.gz
-./cert-manager-verifier_0.2.0_Linux_x86_64/cm-verifier
+./cm-verifier
 
 echo '# Deploying ingress for Argo CD server UI'
 cat <<EOF | microk8s.kubectl apply -f -
