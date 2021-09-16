@@ -70,7 +70,7 @@ cat <<EOF | microk8s.kubectl apply -n argocd -f -
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: argocd-server-http-ingress
+  name: argocd-server-http
   namespace: argocd
   annotations:
     kubernetes.io/ingress.class: "public"   # The "public" ingress class is specific to microk8s

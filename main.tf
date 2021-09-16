@@ -71,30 +71,6 @@ resource "aws_key_pair" "main" {
   public_key = var.key_pair_public_key
 }
 
-resource "aws_iam_policy" "cloudwatch_logging" {
-  name        = "cloudwatch_logging"
-  path        = "/"
-  description = "Allows sending logs to CloudWatch"
-
-  policy = jsonencode({
-    "Version": "2012-10-17"
-    "Statement": [
-      {
-        "Effect": "Allow"
-        "Action": [
-          "logs:CreateLogGroup",
-          "logs:CreateLogStream",
-          "logs:PutLogEvents",
-          "logs:DescribeLogStreams"
-        ]
-        "Resource": [
-          "*"
-        ]
-      }
-    ]
-  })
-}
-
 resource "aws_iam_role" "wireguard" {
   tags = {
     Name      = "wireguard"
@@ -120,7 +96,7 @@ resource "aws_iam_role" "wireguard" {
 resource "aws_iam_policy_attachment" "wireguard_cloudwatch_logging" {
   name       = "wireguard_cloudwatch_logging"
   roles      = [aws_iam_role.wireguard.name]
-  policy_arn = aws_iam_policy.cloudwatch_logging.arn
+  policy_arn = "CloudWatchAgentServerPolicy"
 }
 
 resource "aws_iam_instance_profile" "wireguard" {
@@ -313,7 +289,7 @@ resource "aws_iam_role" "microk8s" {
 resource "aws_iam_policy_attachment" "microk8s_cloudwatch_logging" {
   name       = "microk8s_cloudwatch_logging"
   roles      = [aws_iam_role.microk8s.name]
-  policy_arn = aws_iam_policy.cloudwatch_logging.arn
+  policy_arn = "CloudWatchAgentServerPolicy"
 }
 
 resource "aws_iam_policy_attachment" "microk8s_elastic_ip" {
