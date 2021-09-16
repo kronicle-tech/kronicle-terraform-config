@@ -65,6 +65,26 @@ resource "aws_iam_role" "cert_manager" {
     "Version": "2012-10-17"
     "Statement": [
       {
+        "Action": "sts:AssumeRole"
+        "Principal": {
+          "Service": "ec2.amazonaws.com"
+        },
+        "Effect": "Allow"
+        "Sid": ""
+      }
+    ]
+  })
+}
+
+resource "aws_iam_policy" "cert_manager" {
+  name        = "cert_manager"
+  path        = "/"
+  description = "Allows looking up and modifying a Route 53 zone"
+
+  policy = jsonencode({
+    "Version": "2012-10-17"
+    "Statement": [
+      {
         "Effect": "Allow"
         "Action": "route53:GetChange"
         "Resource": "arn:aws:route53:::change/*"
@@ -84,6 +104,12 @@ resource "aws_iam_role" "cert_manager" {
       }
     ]
   })
+}
+
+resource "aws_iam_policy_attachment" "cert_manager" {
+  name       = "cert_manager"
+  roles      = [aws_iam_role.cert_manager.name]
+  policy_arn = aws_iam_policy.cert_manager.arn
 }
 
 data "aws_ami" "ubuntu" {
