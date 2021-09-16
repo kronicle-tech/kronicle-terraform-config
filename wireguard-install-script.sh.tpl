@@ -9,6 +9,7 @@ exec 2>&1
 echo '# Starting user-data script'
 
 echo '# Installing CloudWatch agent'
+mkdir -p /opt/aws/amazon-cloudwatch-agent/etc/
 cat > /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json <<EOF
 {
    "logs":{
