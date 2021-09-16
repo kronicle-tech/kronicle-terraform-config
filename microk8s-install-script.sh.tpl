@@ -30,6 +30,12 @@ EOF
 wget https://s3.${aws_region}.amazonaws.com/amazoncloudwatch-agent-${aws_region}/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb
 dpkg -i -E ./amazon-cloudwatch-agent.deb
 
+echo '# Updating packages metadata'
+apt-get update -y
+
+echo '# Installing cloud-utils'
+apt-get install -y cloud-utils
+
 echo '# Disabling IPv6'
 sysctl -w net.ipv6.conf.all.disable_ipv6=1
 sysctl -w net.ipv6.conf.default.disable_ipv6=1
@@ -69,7 +75,8 @@ metadata:
     nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
 spec:
   rules:
-  - http:
+  - host: argocd.${internal_domain}
+    http:
       paths:
       - path: /
         pathType: Prefix
@@ -78,7 +85,6 @@ spec:
             name: argocd-server
             port:
               number: 80
-    host: argocd.${internal_domain}
   tls:
   - hosts:
     - argocd.${internal_domain}
