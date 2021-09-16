@@ -30,8 +30,13 @@ EOF
 wget https://s3.${aws_region}.amazonaws.com/amazoncloudwatch-agent-${aws_region}/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb
 dpkg -i -E ./amazon-cloudwatch-agent.deb
 
-echo '# Installing WireGuard'
+echo '# Updating packages metadata'
 apt-get update -y
+
+echo '# Installing cloud-utils'
+apt-get install -y cloud-utils
+
+echo '# Installing WireGuard'
 apt-get install -y wireguard
 
 echo '# Creating WireGuard wg0 interface config file'
