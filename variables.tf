@@ -43,6 +43,11 @@ variable "wireguard_peer_cidr_blocks" {
   # example = ["1.2.3.4/32"]
 }
 
+variable "wireguard_cidr_block" {
+  description = "WireGuard private CIDR block"
+  # example = "10.2.1.0/24"
+}
+
 variable "wireguard_address" {
   description = "WireGuard server address"
   # example = "10.2.1.1/32"
