@@ -65,6 +65,77 @@ microk8s.kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/a
 echo '# Disabling auth and HTTPS for Argo CD server'
 microk8s.kubectl patch deploy argocd-server -n argocd -p '[{"op": "add", "path": "/spec/template/spec/containers/0/command/-", "value": "--disable-auth"}, {"op": "add", "path": "/spec/template/spec/containers/0/command/-", "value": "--insecure"}]' --type json
 
+echo '# Installing cert-manager'
+microk8s.kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1.5.3/cert-manager.yaml
+echo '# Deploying ingress for Argo CD server UI'
+cat <<EOF | microk8s.kubectl apply -f -
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: kronicle-tech-letsencrypt-staging
+spec:
+  acme:
+    email: ${letsencrypt_email_address}   # Let's Encrypt will use this email address to contact about expiring certificates etc.
+    server: https://acme-staging-v02.api.letsencrypt.org/directory
+    privateKeySecretRef:
+      name: kronicle-tech-letsencrypt-staging
+    solvers:
+    - http01:
+        ingress:
+          class: public
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: internal-domain-letsencrypt-staging
+spec:
+  acme:
+    email: ${letsencrypt_email_address}   # Let's Encrypt will use this email address to contact about expiring certificates etc.
+    server: https://acme-staging-v02.api.letsencrypt.org/directory
+    privateKeySecretRef:
+      name: internal-domain-letsencrypt-staging
+    solvers:
+    - dns01:
+        cnameStrategy: Follow
+        route53:
+          region: ${aws_region}
+          hostedZoneID: ${hosted_zone_id}
+          role: ${cert_manager_role}
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: kronicle-tech-letsencrypt-prod
+spec:
+  acme:
+    email: ${letsencrypt_email_address}   # Let's Encrypt will use this email address to contact about expiring certificates etc.
+    server: https://acme-v02.api.letsencrypt.org/directory
+    privateKeySecretRef:
+      name: kronicle-tech-letsencrypt-prod
+    solvers:
+    - http01:
+        ingress:
+          class: public
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: internal-domain-letsencrypt-prod
+spec:
+  acme:
+    email: ${letsencrypt_email_address}   # Let's Encrypt will use this email address to contact about expiring certificates etc.
+    server: https://acme-v02.api.letsencrypt.org/directory
+    privateKeySecretRef:
+      name: internal-domain-letsencrypt-prod
+    solvers:
+    - dns01:
+        cnameStrategy: Follow
+        route53:
+          region: ${aws_region}
+          hostedZoneID: ${hosted_zone_id}
+          role: ${cert_manager_role}
+EOF
+
 echo '# Deploying ingress for Argo CD server UI'
 cat <<EOF | microk8s.kubectl apply -n argocd -f -
 apiVersion: networking.k8s.io/v1
@@ -77,6 +148,7 @@ metadata:
     nginx.ingress.kubernetes.io/whitelist-source-range: "${argocd_ip_allowlist}"
     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
     nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+    cert-manager.io/cluster-issuer: "internal-domain-letsencrypt-staging"
 spec:
   rules:
   - host: argocd.${internal_domain}
@@ -92,12 +164,43 @@ spec:
   tls:
   - hosts:
     - argocd.${internal_domain}
-    secretName: argocd-secret # do not change, this is provided by Argo CD
+    secretName: argocd-server-http-tls
 EOF
 
 echo '# Deploying bootstrap Argo CD app'
 microk8s.kubectl create namespace bootstrap
 cat <<EOF | microk8s.kubectl apply -n argocd -f -
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: bootstrap
+  namespace: argocd   # namespace must be "argocd"
+  # Finalizer that ensures that project is not deleted until it is not referenced by any application
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  description: Project for the Kronicle live demo
+
+  sourceRepos:
+    - 'https://github.com/kronicle-tech/kronicle-argocd-config.git'
+
+  destinations:
+    - namespace: '*'
+      server: https://kubernetes.default.svc
+
+  # Allow all cluster-scoped resources to be created
+  clusterResourceWhitelist:
+    - group: '*'
+      kind: '*'
+
+  # Allow all namespace-scoped resources to be created
+  namespaceResourceWhitelist:
+    - group: '*'
+      kind: '*'
+
+  orphanedResources:
+    warn: false
+---
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -107,7 +210,7 @@ metadata:
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
-  project: default
+  project: bootstrap
 
   # Source of the application manifests
   source:
