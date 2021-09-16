@@ -251,7 +251,7 @@ resource "aws_launch_template" "wireguard" {
 
   user_data = base64encode(templatefile("${path.cwd}/wireguard-install-script.sh.tpl", {
     aws_region = var.aws_region
-    elastic_ip_id = aws_eip.microk8s.id
+    elastic_ip_id = aws_eip.wireguard.id
     address = var.wireguard_address
     listen_port = var.wireguard_listen_port
     private_key = var.wireguard_private_key
