@@ -96,7 +96,7 @@ resource "aws_iam_role" "wireguard" {
 resource "aws_iam_policy_attachment" "wireguard_cloudwatch_logging" {
   name       = "wireguard_cloudwatch_logging"
   roles      = [aws_iam_role.wireguard.name]
-  policy_arn = "CloudWatchAgentServerPolicy"
+  policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
 }
 
 resource "aws_iam_instance_profile" "wireguard" {
@@ -289,7 +289,7 @@ resource "aws_iam_role" "microk8s" {
 resource "aws_iam_policy_attachment" "microk8s_cloudwatch_logging" {
   name       = "microk8s_cloudwatch_logging"
   roles      = [aws_iam_role.microk8s.name]
-  policy_arn = "CloudWatchAgentServerPolicy"
+  policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
 }
 
 resource "aws_iam_policy_attachment" "microk8s_elastic_ip" {
