@@ -343,6 +343,7 @@ resource "aws_launch_template" "microk8s" {
     internal_domain = var.internal_domain
     aws_region = var.aws_region
     microk8s_elastic_ip_id = aws_eip.microk8s.id
+    public_subnet_cidr_block = var.public_subnet_cidr_block
   }))
 }
 
