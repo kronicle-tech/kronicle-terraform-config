@@ -74,7 +74,7 @@ metadata:
   namespace: argocd
   annotations:
     kubernetes.io/ingress.class: "public"   # The "public" ingress class is specific to microk8s
-    nginx.ingress.kubernetes.io/whitelist-source-range: "${public_subnet_cidr_block}"
+    nginx.ingress.kubernetes.io/whitelist-source-range: "${argocd_ip_allowlist}"
     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
     nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
 spec:
