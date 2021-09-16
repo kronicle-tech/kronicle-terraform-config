@@ -436,6 +436,7 @@ resource "aws_launch_template" "microk8s" {
     internal_domain = var.internal_domain
     aws_region = var.aws_region
     elastic_ip_id = aws_eip.microk8s.id
+    letsencrypt_email_address = var.letsencrypt_email_address
     cert_manager_role = aws_iam_role.cert_manager.arn
     argocd_ip_allowlist = var.argocd_ip_allowlist
   }))
