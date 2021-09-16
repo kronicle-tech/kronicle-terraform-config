@@ -33,8 +33,10 @@ dpkg -i -E ./amazon-cloudwatch-agent.deb
 echo '# Updating packages metadata'
 apt-get update -y
 
-echo '# Installing cloud-utils'
-apt-get install -y cloud-utils
+echo '# Installing AWS CLI'
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+sudo ./aws/install
 
 echo '# Disabling IPv6'
 sysctl -w net.ipv6.conf.all.disable_ipv6=1

@@ -33,9 +33,6 @@ dpkg -i -E ./amazon-cloudwatch-agent.deb
 echo '# Updating packages metadata'
 apt-get update -y
 
-echo '# Installing cloud-utils'
-apt-get install -y cloud-utils
-
 echo '# Installing WireGuard'
 apt-get install -y wireguard
 
