@@ -357,7 +357,7 @@ resource "aws_iam_policy" "microk8s_route_53" {
   description = "Allows changing Route 53 records in the internal domain zone"
 
   policy = jsonencode({
-    "Version": "2017-11-27"
+    "Version": "2012-10-17"
     "Statement":[
       {
         "Effect":"Allow"
