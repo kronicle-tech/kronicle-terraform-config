@@ -330,14 +330,6 @@ resource "aws_eip" "microk8s" {
   vpc = true
 }
 
-resource "aws_route53_record" "argocd" {
-  zone_id = aws_route53_zone.internal_domain.zone_id
-  name    = "argocd"
-  type    = "A"
-  ttl     = "300"
-  records = [aws_eip.microk8s.private_ip]
-}
-
 resource "aws_iam_policy" "microk8s_elastic_ip" {
   name        = "microk8s_elastic_ip"
   path        = "/"
@@ -353,6 +345,27 @@ resource "aws_iam_policy" "microk8s_elastic_ip" {
         ]
         "Resource": [
           "*"
+        ]
+      }
+    ]
+  })
+}
+
+resource "aws_iam_policy" "microk8s_route_53" {
+  name        = "microk8s_route_53"
+  path        = "/"
+  description = "Allows changing Route 53 records in the internal domain zone"
+
+  policy = jsonencode({
+    "Version": "2017-11-27"
+    "Statement":[
+      {
+        "Effect":"Allow"
+        "Action": [
+          "route53:ChangeResourceRecordSets"
+        ]
+        "Resource": [
+          "arn:aws:route53:::hostedzone/${aws_route53_zone.internal_domain.zone_id}"
         ]
       }
     ]
@@ -492,4 +505,10 @@ resource "aws_iam_policy_attachment" "elastic_ip" {
   name       = "elastic_ip"
   roles      = [aws_iam_role.wireguard.name, aws_iam_role.microk8s.name]
   policy_arn = aws_iam_policy.associate_elastic_ip.arn
+}
+
+resource "aws_iam_policy_attachment" "microk8s_route_53" {
+  name       = "microk8s_route_53"
+  roles      = [aws_iam_role.microk8s.name]
+  policy_arn = aws_iam_policy.microk8s_route_53.arn
 }
