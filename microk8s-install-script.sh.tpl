@@ -79,10 +79,6 @@ snap install microk8s --classic --channel=1.22/stable
 echo '# Waiting for microk8s to be ready'
 microk8s status --wait-ready
 
-echo '# Creating kube config file'
-mkdir ~/.kube
-microk8s config > ~/.kube/config
-
 echo '# Enabling dns and ingress microk8s features'
 microk8s enable dns ingress storage
 
