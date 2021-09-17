@@ -65,12 +65,13 @@ resource "aws_iam_role" "cert_manager" {
     "Version": "2012-10-17"
     "Statement": [
       {
+        "Effect": "Allow"
         "Action": "sts:AssumeRole"
         "Principal": {
-          "Service": "ec2.amazonaws.com"
-        },
-        "Effect": "Allow"
-        "Sid": ""
+          "AWS": [
+            aws_iam_role.microk8s.arn
+          ]
+        }
       }
     ]
   })
@@ -174,12 +175,11 @@ resource "aws_iam_role" "wireguard" {
     "Version": "2012-10-17"
     "Statement": [
       {
+        "Effect": "Allow"
         "Action": "sts:AssumeRole"
         "Principal": {
           "Service": "ec2.amazonaws.com"
-        },
-        "Effect": "Allow"
-        "Sid": ""
+        }
       }
     ]
   })
@@ -383,12 +383,11 @@ resource "aws_iam_role" "microk8s" {
     "Version": "2012-10-17"
     "Statement": [
       {
+        "Effect": "Allow"
         "Action": "sts:AssumeRole"
         "Principal": {
           "Service": "ec2.amazonaws.com"
-        },
-        "Effect": "Allow"
-        "Sid": ""
+        }
       }
     ]
   })
