@@ -8,6 +8,9 @@ exec 2>&1
 
 echo '# Starting user-data script'
 
+# Export HOME so cm-verifier can find "~/.kube/config"
+export HOME=/root
+
 echo '# Updating packages metadata'
 apt-get update -y
 
@@ -87,13 +90,6 @@ echo '# Adjusting firewall rules for microk8s'
 ufw allow in on cni0 && ufw allow out on cni0
 ufw default allow routed
 
-echo '# Installing Argo CD'
-microk8s.kubectl create namespace argocd
-microk8s.kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
-
-echo '# Disabling auth and HTTPS for Argo CD server'
-microk8s.kubectl patch deploy argocd-server -n argocd -p '[{"op": "add", "path": "/spec/template/spec/containers/0/command/-", "value": "--disable-auth"}, {"op": "add", "path": "/spec/template/spec/containers/0/command/-", "value": "--insecure"}]' --type json
-
 echo '# Installing cert-manager'
 microk8s.kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1.5.3/cert-manager.yaml
 
@@ -101,6 +97,13 @@ echo '# Waiting for cert-manager to fully start'
 wget https://github.com/alenkacz/cert-manager-verifier/releases/download/v0.2.0/cert-manager-verifier_0.2.0_Linux_x86_64.tar.gz
 tar zxvf cert-manager-verifier_0.2.0_Linux_x86_64.tar.gz
 ./cm-verifier
+
+echo '# Installing Argo CD'
+microk8s.kubectl create namespace argocd
+microk8s.kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+
+echo '# Disabling auth and HTTPS for Argo CD server'
+microk8s.kubectl patch deploy argocd-server -n argocd -p '[{"op": "add", "path": "/spec/template/spec/containers/0/command/-", "value": "--disable-auth"}, {"op": "add", "path": "/spec/template/spec/containers/0/command/-", "value": "--insecure"}]' --type json
 
 echo '# Deploying ingress for Argo CD server UI'
 cat <<EOF | microk8s.kubectl apply -f -
