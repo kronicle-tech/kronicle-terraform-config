@@ -497,7 +497,7 @@ resource "aws_autoscaling_group" "microk8s" {
 
     launch_template {
       launch_template_specification {
-        id      = aws_launch_template.microk8s.id
+        launch_id      = aws_launch_template.microk8s.id
         version = "$Latest"
       }
     }
