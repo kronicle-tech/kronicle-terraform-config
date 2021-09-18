@@ -488,9 +488,19 @@ resource "aws_autoscaling_group" "microk8s" {
   max_size           = 1
   min_size           = 1
 
-  launch_template {
-    id      = aws_launch_template.microk8s.id
-    version = "$Latest"
+  mixed_instances_policy {
+    instances_distribution {
+      on_demand_base_capacity = 0
+      on_demand_percentage_above_base_capacity = 0
+      spot_allocation_strategy = "lowest-price"
+    }
+
+    launch_template {
+      launch_template_specification {
+        id      = aws_launch_template.microk8s.id
+        version = "$Latest"
+      }
+    }
   }
 }
 
