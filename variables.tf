@@ -3,9 +3,14 @@ variable "internal_domain" {
   # example = "example.com"
 }
 
-variable "letsencrypt_email_address" {
-  description = "Email address for emails from Let's Encrypt"
-  # example = "example@example.com"
+variable "zerossl_eab_kid" {
+  description = "EAB KID for ZeroSSL"
+  # example = "test1234"
+}
+
+variable "zerossl_eab_hmac_key" {
+  description = "EAB HMAC Key for ZeroSSL"
+  # example = "test1234"
 }
 
 variable "aws_region" {
