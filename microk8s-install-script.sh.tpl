@@ -261,9 +261,9 @@ spec:
     helm:
       parameters:
         - name: "externalSecrets.awsRegion"
-          value: ${aws_region}
-        - name: "externalSecrets.awsRegion"
-          value: ${external_secrets_aws_role}
+          value: "${aws_region}"
+        - name: "externalSecrets.awsRole"
+          value: "${external_secrets_aws_role}"
 
       valueFiles:
         - values-prod.yaml
