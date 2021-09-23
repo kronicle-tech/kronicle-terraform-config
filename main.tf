@@ -517,7 +517,7 @@ resource "aws_launch_template" "microk8s" {
   }
 
   block_device_mappings {
-    device_name = "/dev/xvda"
+    device_name = "/dev/sda1"
 
     ebs {
       volume_size = 64
