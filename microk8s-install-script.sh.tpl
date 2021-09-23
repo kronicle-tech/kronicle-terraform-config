@@ -109,16 +109,29 @@ microk8s.kubectl patch deploy argocd-server -n argocd -p '[{"op": "add", "path":
 
 echo '# Deploying ingress for Argo CD server UI'
 cat <<EOF | microk8s.kubectl apply -f -
+apiVersion: v1
+kind: Secret
+metadata:
+  namespace: kube-system
+  name: zerossl-eab-hmac-key
+data:
+  secret: ${zerossl_eab_hmac_key}
+---
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
 metadata:
-  name: kronicle-tech-letsencrypt-staging
+  name: kronicle-tech-zerossl
 spec:
   acme:
-    email: ${letsencrypt_email_address}   # Let's Encrypt will use this email address to contact about expiring certificates etc.
-    server: https://acme-staging-v02.api.letsencrypt.org/directory
+    server: https://acme.zerossl.com/v2/DV90
+    externalAccountBinding:
+      keyID: ${zerossl_eab_kid}
+      keySecretRef:
+        name: zerossl-eab-hmac-key
+        key: secret
+      keyAlgorithm: HS256
     privateKeySecretRef:
-      name: kronicle-tech-letsencrypt-staging
+      name: kronicle-tech-zerossl
     solvers:
     - http01:
         ingress:
@@ -127,51 +140,23 @@ spec:
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
 metadata:
-  name: internal-domain-letsencrypt-staging
+  name: internal-domain-zerossl
 spec:
   acme:
-    email: ${letsencrypt_email_address}   # Let's Encrypt will use this email address to contact about expiring certificates etc.
-    server: https://acme-staging-v02.api.letsencrypt.org/directory
+    server: https://acme.zerossl.com/v2/DV90
+    externalAccountBinding:
+      keyID: ${zerossl_eab_kid}
+      keySecretRef:
+        name: zerossl-eab-hmac-key
+        key: secret
+      keyAlgorithm: HS256
     privateKeySecretRef:
-      name: internal-domain-letsencrypt-staging
+      name: internal-domain-zerossl
     solvers:
     - dns01:
         cnameStrategy: Follow
         route53:
           region: ${aws_region}
-          role: ${cert_manager_role}
----
-apiVersion: cert-manager.io/v1
-kind: ClusterIssuer
-metadata:
-  name: kronicle-tech-letsencrypt-prod
-spec:
-  acme:
-    email: ${letsencrypt_email_address}   # Let's Encrypt will use this email address to contact about expiring certificates etc.
-    server: https://acme-v02.api.letsencrypt.org/directory
-    privateKeySecretRef:
-      name: kronicle-tech-letsencrypt-prod
-    solvers:
-    - http01:
-        ingress:
-          class: public
----
-apiVersion: cert-manager.io/v1
-kind: ClusterIssuer
-metadata:
-  name: internal-domain-letsencrypt-prod
-spec:
-  acme:
-    email: ${letsencrypt_email_address}   # Let's Encrypt will use this email address to contact about expiring certificates etc.
-    server: https://acme-v02.api.letsencrypt.org/directory
-    privateKeySecretRef:
-      name: internal-domain-letsencrypt-prod
-    solvers:
-    - dns01:
-        cnameStrategy: Follow
-        route53:
-          region: ${aws_region}
-          hostedZoneID: ${hosted_zone_id}
           role: ${cert_manager_role}
 EOF
 
@@ -187,7 +172,7 @@ metadata:
     nginx.ingress.kubernetes.io/whitelist-source-range: "${argocd_ip_allowlist}"
     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
     nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
-    cert-manager.io/cluster-issuer: "internal-domain-letsencrypt-prod"
+    cert-manager.io/cluster-issuer: "internal-domain-zerossl"
 spec:
   rules:
   - host: argocd.${internal_domain}

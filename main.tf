@@ -534,6 +534,8 @@ resource "aws_launch_template" "microk8s" {
     aws_region = var.aws_region
     elastic_ip_id = aws_eip.microk8s.id
     hosted_zone_id = aws_route53_zone.internal_domain.zone_id
+    zerossl_eab_kid = var.zerossl_eab_kid
+    zerossl_eab_hmac_key = var.zerossl_eab_hmac_key
     letsencrypt_email_address = var.letsencrypt_email_address
     hosted_zone_id = aws_route53_zone.internal_domain.zone_id
     cert_manager_role = aws_iam_role.cert_manager.arn
