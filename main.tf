@@ -2,9 +2,15 @@ provider "aws" {
   region = var.aws_region
 }
 
+data "aws_caller_identity" "current" {}
+
+locals {
+  aws_account_id = data.aws_caller_identity.current.account_id
+}
+
 resource "aws_vpc" "demo" {
   tags = {
-    Name = "demo"
+    Name = "main"
     terraform = "true"
   }
 
@@ -111,6 +117,59 @@ resource "aws_iam_policy_attachment" "cert_manager" {
   name       = "cert_manager"
   roles      = [aws_iam_role.cert_manager.name]
   policy_arn = aws_iam_policy.cert_manager.arn
+}
+
+resource "aws_iam_role" "external_secrets" {
+  tags = {
+    Name      = "external_secrets"
+    terraform = "true"
+  }
+
+  name               = "external_secrets"
+  assume_role_policy = jsonencode({
+    "Version": "2012-10-17"
+    "Statement": [
+      {
+        "Effect": "Allow"
+        "Action": "sts:AssumeRole"
+        "Principal": {
+          "AWS": [
+            aws_iam_role.microk8s.arn
+          ]
+        }
+      }
+    ]
+  })
+}
+
+resource "aws_iam_policy" "external_secrets" {
+  name        = "external_secrets"
+  path        = "/"
+  description = "Allows retrieving certain secrets from Secrets Manager"
+
+  policy = jsonencode({
+    "Version": "2012-10-17"
+    "Statement": [
+      {
+        "Effect": "Allow",
+        "Action": [
+          "secretsmanager:GetResourcePolicy",
+          "secretsmanager:GetSecretValue",
+          "secretsmanager:DescribeSecret",
+          "secretsmanager:ListSecretVersionIds"
+        ],
+        "Resource": [
+          "arn:aws:secretsmanager:${var.aws_region}:${local.aws_account_id}:secret:main/kronicle-service/*",
+        ]
+      }
+    ]
+  })
+}
+
+resource "aws_iam_policy_attachment" "external_secrets" {
+  name       = "external_secrets"
+  roles      = [aws_iam_role.external_secrets.name]
+  policy_arn = aws_iam_policy.external_secrets.arn
 }
 
 data "aws_ami" "ubuntu" {
@@ -479,6 +538,7 @@ resource "aws_launch_template" "microk8s" {
     hosted_zone_id = aws_route53_zone.internal_domain.zone_id
     cert_manager_role = aws_iam_role.cert_manager.arn
     argocd_ip_allowlist = var.argocd_ip_allowlist
+    external_secrets_aws_role = aws_iam_role.external_secrets.arn
   }))
 }
 
