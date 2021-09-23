@@ -8,7 +8,7 @@ locals {
   aws_account_id = data.aws_caller_identity.current.account_id
 }
 
-resource "aws_vpc" "demo" {
+resource "aws_vpc" "main" {
   tags = {
     Name = "main"
     terraform = "true"
@@ -23,7 +23,7 @@ resource "aws_subnet" "public" {
     terraform = "true"
   }
 
-  vpc_id = aws_vpc.demo.id
+  vpc_id = aws_vpc.main.id
   cidr_block = var.public_subnet_cidr_block
   availability_zone = var.public_subnet_az
 }
@@ -34,7 +34,7 @@ resource "aws_internet_gateway" "main" {
     terraform = "true"
   }
 
-  vpc_id = aws_vpc.demo.id
+  vpc_id = aws_vpc.main.id
 }
 
 resource "aws_default_route_table" "default" {
@@ -43,7 +43,7 @@ resource "aws_default_route_table" "default" {
     terraform = "true"
   }
 
-  default_route_table_id = aws_vpc.demo.default_route_table_id
+  default_route_table_id = aws_vpc.main.default_route_table_id
 
   route {
     cidr_block = "0.0.0.0/0"
@@ -256,7 +256,7 @@ resource "aws_security_group" "ssh_public_subnet" {
   }
 
   description = "Allow instances in public subnet to connect to SSH port"
-  vpc_id      = aws_vpc.demo.id
+  vpc_id      = aws_vpc.main.id
 
   ingress {
     from_port   = 22
@@ -273,7 +273,7 @@ resource "aws_security_group" "wireguard_public_internet" {
   }
 
   description = "Allow traffic from internet from WireGuard peers"
-  vpc_id      = aws_vpc.demo.id
+  vpc_id      = aws_vpc.main.id
 
   ingress {
     from_port   = var.wireguard_listen_port
@@ -297,7 +297,7 @@ resource "aws_security_group" "wireguard_internal" {
   }
 
   description = "Allow traffic to internal resources from Wireguard peers"
-  vpc_id      = aws_vpc.demo.id
+  vpc_id      = aws_vpc.main.id
 
   ingress {
     from_port       = 0
@@ -464,7 +464,7 @@ resource "aws_security_group" "microk8s_public_subnet" {
   }
 
   description = "Allow traffic from other private IP addresses in public subnet"
-  vpc_id      = aws_vpc.demo.id
+  vpc_id      = aws_vpc.main.id
 
   ingress {
     from_port   = 80
