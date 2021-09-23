@@ -260,9 +260,9 @@ spec:
     # helm specific config
     helm:
       parameters:
-        - name: "external-secrets.aws-region"
+        - name: "externalSecrets.awsRegion"
           value: ${aws_region}
-        - name: "external-secrets.aws-role"
+        - name: "externalSecrets.awsRegion"
           value: ${external_secrets_aws_role}
 
       valueFiles:
