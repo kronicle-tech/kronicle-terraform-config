@@ -129,7 +129,6 @@ spec:
       keySecretRef:
         name: zerossl-eab-hmac-key
         key: secret
-      keyAlgorithm: HS256
     privateKeySecretRef:
       name: kronicle-tech-zerossl
     solvers:
