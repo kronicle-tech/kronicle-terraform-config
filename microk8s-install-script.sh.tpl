@@ -115,7 +115,7 @@ metadata:
   namespace: kube-system
   name: zerossl-eab-hmac-key
 data:
-  secret: ${zerossl_eab_hmac_key}
+  secret: "${base64encode(zerossl_eab_hmac_key)}"
 ---
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
@@ -125,7 +125,7 @@ spec:
   acme:
     server: https://acme.zerossl.com/v2/DV90
     externalAccountBinding:
-      keyID: ${zerossl_eab_kid}
+      keyID: "${zerossl_eab_kid}"
       keySecretRef:
         name: zerossl-eab-hmac-key
         key: secret
