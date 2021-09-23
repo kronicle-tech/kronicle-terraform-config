@@ -516,6 +516,14 @@ resource "aws_launch_template" "microk8s" {
     availability_zone = var.public_subnet_az
   }
 
+  block_device_mappings {
+    device_name = "/dev/xvda"
+
+    ebs {
+      volume_size = 64
+    }
+  }
+
   network_interfaces {
     subnet_id       = aws_subnet.public.id
     associate_public_ip_address = true
