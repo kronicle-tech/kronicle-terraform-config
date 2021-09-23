@@ -112,7 +112,7 @@ cat <<EOF | microk8s.kubectl apply -f -
 apiVersion: v1
 kind: Secret
 metadata:
-  namespace: kube-system
+  namespace: cert-manager
   name: zerossl-eab-hmac-key
 data:
   secret: "${base64encode(zerossl_eab_hmac_key)}"
