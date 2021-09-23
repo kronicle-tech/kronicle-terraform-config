@@ -259,8 +259,14 @@ spec:
 
     # helm specific config
     helm:
+      parameters:
+        - name: "external-secrets.aws-region"
+          value: ${aws_region}
+        - name: "external-secrets.aws-role"
+          value: ${external_secrets_aws_role}
+
       valueFiles:
-      - values-prod.yaml
+        - values-prod.yaml
 
   destination:
     server: https://kubernetes.default.svc
