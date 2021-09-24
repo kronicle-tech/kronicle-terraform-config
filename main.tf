@@ -159,8 +159,9 @@ resource "aws_iam_policy" "external_secrets" {
           "secretsmanager:ListSecretVersionIds"
         ],
         "Resource": [
-          "arn:aws:secretsmanager:${var.aws_region}:${local.aws_account_id}:secret:${var.cert_manager_secrets_manager_secret_name}",
-          "arn:aws:secretsmanager:${var.aws_region}:${local.aws_account_id}:secret:${var.kronicle_secrets_manager_secret_name}",
+          // secret ARN needs to end with "-??????" to match suffix Secrets Manager adds to secret names
+          "arn:aws:secretsmanager:${var.aws_region}:${local.aws_account_id}:secret:${var.cert_manager_secrets_manager_secret_name}-??????",
+          "arn:aws:secretsmanager:${var.aws_region}:${local.aws_account_id}:secret:${var.kronicle_secrets_manager_secret_name}-??????",
         ]
       }
     ]
