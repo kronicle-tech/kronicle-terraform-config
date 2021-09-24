@@ -159,7 +159,8 @@ resource "aws_iam_policy" "external_secrets" {
           "secretsmanager:ListSecretVersionIds"
         ],
         "Resource": [
-          "arn:aws:secretsmanager:${var.aws_region}:${local.aws_account_id}:secret:main/kronicle-service/*",
+          "arn:aws:secretsmanager:${var.aws_region}:${local.aws_account_id}:secret:${var.cert_manager_secrets_manager_secret_name}",
+          "arn:aws:secretsmanager:${var.aws_region}:${local.aws_account_id}:secret:${var.kronicle_secrets_manager_secret_name}",
         ]
       }
     ]
@@ -539,15 +540,15 @@ resource "aws_launch_template" "microk8s" {
 
   user_data = base64encode(templatefile("${path.cwd}/microk8s-install-script.sh.tpl", {
     internal_domain = var.internal_domain
+    external_domain = var.external_domain
     aws_region = var.aws_region
     elastic_ip_id = aws_eip.microk8s.id
     hosted_zone_id = aws_route53_zone.internal_domain.zone_id
-    zerossl_eab_kid = var.zerossl_eab_kid
-    zerossl_eab_hmac_key = var.zerossl_eab_hmac_key
-    hosted_zone_id = aws_route53_zone.internal_domain.zone_id
-    cert_manager_role = aws_iam_role.cert_manager.arn
-    argocd_ip_allowlist = var.argocd_ip_allowlist
     external_secrets_aws_role = aws_iam_role.external_secrets.arn
+    cert_manager_role = aws_iam_role.cert_manager.arn
+    cert_manager_secrets_manager_secret_name = var.cert_manager_secrets_manager_secret_name
+    argocd_ip_allowlist = var.argocd_ip_allowlist
+    kronicle_secrets_manager_secret_name = var.kronicle_secrets_manager_secret_name
   }))
 }
 

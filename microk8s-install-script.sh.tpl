@@ -107,89 +107,6 @@ microk8s.kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/a
 echo '# Disabling auth and HTTPS for Argo CD server'
 microk8s.kubectl patch deploy argocd-server -n argocd -p '[{"op": "add", "path": "/spec/template/spec/containers/0/command/-", "value": "--disable-auth"}, {"op": "add", "path": "/spec/template/spec/containers/0/command/-", "value": "--insecure"}]' --type json
 
-echo '# Deploying ingress for Argo CD server UI'
-cat <<EOF | microk8s.kubectl apply -f -
-apiVersion: v1
-kind: Secret
-metadata:
-  namespace: cert-manager
-  name: zerossl-eab-hmac-key
-data:
-  secret: "${base64encode(zerossl_eab_hmac_key)}"
----
-apiVersion: cert-manager.io/v1
-kind: ClusterIssuer
-metadata:
-  name: kronicle-tech-zerossl
-spec:
-  acme:
-    server: https://acme.zerossl.com/v2/DV90
-    externalAccountBinding:
-      keyID: "${zerossl_eab_kid}"
-      keySecretRef:
-        name: zerossl-eab-hmac-key
-        key: secret
-    privateKeySecretRef:
-      name: kronicle-tech-zerossl
-    solvers:
-    - http01:
-        ingress:
-          class: public
----
-apiVersion: cert-manager.io/v1
-kind: ClusterIssuer
-metadata:
-  name: internal-domain-zerossl
-spec:
-  acme:
-    server: https://acme.zerossl.com/v2/DV90
-    externalAccountBinding:
-      keyID: ${zerossl_eab_kid}
-      keySecretRef:
-        name: zerossl-eab-hmac-key
-        key: secret
-      keyAlgorithm: HS256
-    privateKeySecretRef:
-      name: internal-domain-zerossl
-    solvers:
-    - dns01:
-        cnameStrategy: Follow
-        route53:
-          region: ${aws_region}
-          role: ${cert_manager_role}
-EOF
-
-echo '# Deploying ingress for Argo CD server UI'
-cat <<EOF | microk8s.kubectl apply -n argocd -f -
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: argocd-server-http
-  namespace: argocd
-  annotations:
-    kubernetes.io/ingress.class: "public"   # The "public" ingress class is specific to microk8s
-    nginx.ingress.kubernetes.io/whitelist-source-range: "${argocd_ip_allowlist}"
-    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
-    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
-    cert-manager.io/cluster-issuer: "internal-domain-zerossl"
-spec:
-  rules:
-  - host: argocd.${internal_domain}
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: argocd-server
-            port:
-              number: 80
-  tls:
-  - hosts:
-    - argocd.${internal_domain}
-    secretName: argocd-server-http-tls
-EOF
-
 echo '# Deploying bootstrap Argo CD app'
 microk8s.kubectl create namespace bootstrap
 cat <<EOF | microk8s.kubectl apply -n argocd -f -
@@ -244,10 +161,22 @@ spec:
     # helm specific config
     helm:
       parameters:
-        - name: "externalSecrets.awsRegion"
+        - name: "projects.argocd.helmParameters.internalDomain"
+          value: "${internal_domain}"
+        - name: "projects.cert-manager.helmParameters.internalDomain"
+          value: "${internal_domain}"
+        - name: "projects.cert-manager.helmParameters.externalDomain"
+          value: "${external_domain}"
+        - name: "projects.cert-manager.helmParameters.secretsManagerSecretName"
+          value: "${cert_manager_secrets_manager_secret_name}"
+        - name: "projects.external-secrets.helmParameters.awsRegion"
           value: "${aws_region}"
-        - name: "externalSecrets.awsRole"
+        - name: "projects.external-secrets.helmParameters.awsRole"
           value: "${external_secrets_aws_role}"
+        - name: "projects.kronicle.helmParameters.externalDomain"
+          value: "${external_domain}"
+        - name: "projects.kronicle.helmParameters.secretsManagerSecretName"
+          value: "${kronicle_secrets_manager_secret_name}"
 
       valueFiles:
         - values-prod.yaml
