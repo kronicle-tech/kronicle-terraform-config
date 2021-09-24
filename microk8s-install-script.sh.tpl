@@ -90,16 +90,6 @@ echo '# Adjusting firewall rules for microk8s'
 ufw allow in on cni0 && ufw allow out on cni0
 ufw default allow routed
 
-echo '# Installing cert-manager'
-microk8s.kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1.5.3/cert-manager.yaml
-
-echo '# Waiting for cert-manager to fully start'
-wget https://github.com/alenkacz/cert-manager-verifier/releases/download/v0.2.0/cert-manager-verifier_0.2.0_Linux_x86_64.tar.gz
-tar zxvf cert-manager-verifier_0.2.0_Linux_x86_64.tar.gz
-./cm-verifier
-# cm-verifier output is missing a final newline
-echo ''
-
 echo '# Installing Argo CD'
 microk8s.kubectl create namespace argocd
 microk8s.kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
@@ -163,6 +153,8 @@ spec:
       parameters:
         - name: "projects.argocd.helmParameters.internalDomain"
           value: "${internal_domain}"
+        - name: "projects.argocd.helmParameters.ipAllowList"
+          value: "${argocd_ip_allowlist}"
         - name: "projects.cert-manager.helmParameters.internalDomain"
           value: "${internal_domain}"
         - name: "projects.cert-manager.helmParameters.externalDomain"
