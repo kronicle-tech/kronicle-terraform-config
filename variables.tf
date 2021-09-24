@@ -3,6 +3,11 @@ variable "internal_domain" {
   # example = "example.com"
 }
 
+variable "external_domain" {
+  description = "External DNS domain"
+  # example = "example.com"
+}
+
 variable "zerossl_eab_kid" {
   description = "EAB KID for ZeroSSL"
   # example = "test1234"
@@ -53,11 +58,6 @@ variable "wireguard_peer_cidr_blocks" {
   # example = ["1.2.3.4/32"]
 }
 
-variable "argocd_ip_allowlist" {
-  description = "IP allowlist for accessing Argo CD server"
-  # example = "10.1.1.0/24"
-}
-
 variable "wireguard_address" {
   description = "WireGuard server address"
   # example = "10.2.1.1/32"
@@ -86,4 +86,19 @@ variable "microk8s_instance_type" {
 variable "microk8s_cpu_credits" {
   description = "Credit option for CPU usage"
   # example = "standard"
+}
+
+variable "cert_manager_secrets_manager_secret_name" {
+  description = "Secret name in Secrets Manager for cert-manager"
+  # example = "test1234"
+}
+
+variable "argocd_ip_allowlist" {
+  description = "IP allowlist for accessing Argo CD server"
+  # example = "10.1.1.0/24"
+}
+
+variable "kronicle_secrets_manager_secret_name" {
+  description = "Secret name in Secrets Manager for Kronicle"
+  # example = "test1234"
 }
