@@ -151,23 +151,23 @@ spec:
     # helm specific config
     helm:
       parameters:
-        - name: "projects.argocd.helmParameters.internalDomain"
+        - name: "applications.argocd.helmParameters.internalDomain"
           value: "${internal_domain}"
-        - name: "projects.argocd.helmParameters.ipAllowList"
+        - name: "applications.argocd.helmParameters.ipAllowList"
           value: "${argocd_ip_allowlist}"
-        - name: "projects.cert-manager-config.helmParameters.internalDomain"
+        - name: "applications.cert-manager-config.helmParameters.internalDomain"
           value: "${internal_domain}"
-        - name: "projects.cert-manager-config.helmParameters.externalDomain"
+        - name: "applications.cert-manager-config.helmParameters.externalDomain"
           value: "${external_domain}"
-        - name: "projects.cert-manager-config.helmParameters.secretsManagerSecretName"
+        - name: "applications.cert-manager-config.helmParameters.secretsManagerSecretName"
           value: "${cert_manager_secrets_manager_secret_name}"
-        - name: "projects.external-secrets-config.helmParameters.awsRegion"
+        - name: "applications.external-secrets-config.helmParameters.awsRegion"
           value: "${aws_region}"
-        - name: "projects.external-secrets-config.helmParameters.awsRole"
+        - name: "applications.external-secrets-config.helmParameters.awsRole"
           value: "${external_secrets_aws_role}"
-        - name: "projects.kronicle.helmParameters.externalDomain"
+        - name: "applications.kronicle.helmParameters.externalDomain"
           value: "${external_domain}"
-        - name: "projects.kronicle.helmParameters.secretsManagerSecretName"
+        - name: "applications.kronicle.helmParameters.secretsManagerSecretName"
           value: "${kronicle_secrets_manager_secret_name}"
 
       valueFiles:
