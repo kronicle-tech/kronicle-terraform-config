@@ -13,11 +13,6 @@ variable "zerossl_eab_kid" {
   # example = "test1234"
 }
 
-variable "zerossl_eab_hmac_key" {
-  description = "EAB HMAC Key for ZeroSSL"
-  # example = "test1234"
-}
-
 variable "aws_region" {
   description = "AWS region"
   # example = "eu-west-1"
