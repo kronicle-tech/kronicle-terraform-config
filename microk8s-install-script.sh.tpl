@@ -188,6 +188,8 @@ spec:
           value: "${cert_manager_aws_role}"
         - name: "applications.cert-manager-config.helmParameters.secretsManagerSecretName"
           value: "${cert_manager_secrets_manager_secret_name}"
+        - name: "applications.cert-manager-config.helmParameters.zerosslEabKid"
+          value: "${zerossl_eab_kid}"
         - name: "applications.cert-manager-config.helmParameters.internalDomain"
           value: "${internal_domain}"
         - name: "applications.cert-manager-config.helmParameters.externalDomain"
