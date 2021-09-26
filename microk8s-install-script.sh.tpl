@@ -182,20 +182,24 @@ spec:
     # helm specific config
     helm:
       parameters:
+        - name: "applications.cert-manager-config.helmParameters.awsRegion"
+          value: "${aws_region}"
+        - name: "applications.cert-manager-config.helmParameters.awsRole"
+          value: "${cert_manager_aws_role}"
+        - name: "applications.cert-manager-config.helmParameters.secretsManagerSecretName"
+          value: "${cert_manager_secrets_manager_secret_name}"
         - name: "applications.cert-manager-config.helmParameters.internalDomain"
           value: "${internal_domain}"
         - name: "applications.cert-manager-config.helmParameters.externalDomain"
           value: "${external_domain}"
-        - name: "applications.cert-manager-config.helmParameters.secretsManagerSecretName"
-          value: "${cert_manager_secrets_manager_secret_name}"
         - name: "applications.external-secrets-config.helmParameters.awsRegion"
           value: "${aws_region}"
         - name: "applications.external-secrets-config.helmParameters.awsRole"
           value: "${external_secrets_aws_role}"
-        - name: "applications.kronicle.helmParameters.externalDomain"
-          value: "${external_domain}"
         - name: "applications.kronicle.helmParameters.secretsManagerSecretName"
           value: "${kronicle_secrets_manager_secret_name}"
+        - name: "applications.kronicle.helmParameters.externalDomain"
+          value: "${external_domain}"
 
       valueFiles:
         - values-prod.yaml
