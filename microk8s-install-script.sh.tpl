@@ -97,6 +97,37 @@ microk8s.kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/a
 echo '# Disabling auth and HTTPS for Argo CD server'
 microk8s.kubectl patch deploy argocd-server -n argocd -p '[{"op": "add", "path": "/spec/template/spec/containers/0/command/-", "value": "--disable-auth"}, {"op": "add", "path": "/spec/template/spec/containers/0/command/-", "value": "--insecure"}]' --type json
 
+echo '# Creating Argo CD ingress'
+cat <<EOF | microk8s.kubectl apply -n argocd -f -
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: argocd-server-http
+  namespace: argocd
+  annotations:
+    kubernetes.io/ingress.class: "public"   # The "public" ingress class is specific to microk8s
+    nginx.ingress.kubernetes.io/whitelist-source-range: "${argocd_ip_allowlist}"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+    cert-manager.io/cluster-issuer: "zerossl"
+spec:
+  rules:
+    - host: argocd.${internal_domain}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: argocd-server
+                port:
+                  number: 80
+  tls:
+    - hosts:
+        - argocd.${internal_domain}
+      secretName: argocd-server-http-tls
+EOF
+
 echo '# Deploying bootstrap Argo CD app'
 microk8s.kubectl create namespace bootstrap
 cat <<EOF | microk8s.kubectl apply -n argocd -f -
@@ -151,10 +182,6 @@ spec:
     # helm specific config
     helm:
       parameters:
-        - name: "applications.argocd.helmParameters.internalDomain"
-          value: "${internal_domain}"
-        - name: "applications.argocd.helmParameters.ipAllowList"
-          value: "${argocd_ip_allowlist}"
         - name: "applications.cert-manager-config.helmParameters.internalDomain"
           value: "${internal_domain}"
         - name: "applications.cert-manager-config.helmParameters.externalDomain"
