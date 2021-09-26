@@ -547,7 +547,7 @@ resource "aws_launch_template" "microk8s" {
     hosted_zone_id = aws_route53_zone.internal_domain.zone_id
     argocd_ip_allowlist = var.argocd_ip_allowlist
     external_secrets_aws_role = aws_iam_role.external_secrets.arn
-    cert_manager_role = aws_iam_role.cert_manager.arn
+    cert_manager_aws_role = aws_iam_role.cert_manager.arn
     cert_manager_secrets_manager_secret_name = var.cert_manager_secrets_manager_secret_name
     kronicle_secrets_manager_secret_name = var.kronicle_secrets_manager_secret_name
   }))
