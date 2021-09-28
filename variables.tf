@@ -88,7 +88,7 @@ variable "cert_manager_secrets_manager_secret_name" {
   # example = "test1234"
 }
 
-variable "argocd_ip_allowlist" {
+variable "internal_ip_allowlist" {
   description = "IP allowlist for accessing Argo CD server"
   # example = "10.1.1.0/24"
 }

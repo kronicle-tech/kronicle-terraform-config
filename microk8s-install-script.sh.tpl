@@ -129,7 +129,7 @@ metadata:
   namespace: argocd
   annotations:
     kubernetes.io/ingress.class: "public"   # The "public" ingress class is specific to microk8s
-    nginx.ingress.kubernetes.io/whitelist-source-range: "${argocd_ip_allowlist}"
+    nginx.ingress.kubernetes.io/whitelist-source-range: "${internal_ip_allowlist}"
     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
     nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
     cert-manager.io/cluster-issuer: "zerossl"
@@ -243,6 +243,8 @@ spec:
           value: "${kronicle_secrets_manager_secret_name}"
         - name: "applications.kronicle.helmParameters.externalDomain"
           value: "${external_domain}"
+        - name: "applications.zipkin.helmParameters.ingressIpAllowList"
+          value: "${internal_ip_allowlist}"
         - name: "applications.zipkin.helmParameters.internalDomain"
           value: "${internal_domain}"
 
