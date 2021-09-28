@@ -128,6 +128,24 @@ spec:
       secretName: argocd-server-http-tls
 EOF
 
+echo '# Creating ConfigMap for Argo CD config'
+cat <<EOF | microk8s.kubectl apply -n argocd -f -
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-cm
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: argocd-cm
+    app.kubernetes.io/part-of: argocd
+data:
+  resource.customizations.ignoreDifferences.admissionregistration.k8s.io_ValidatingWebhookConfiguration: |
+    jqPathExpressions:
+      # Ignore expected differences in caBundle field of ValidatingWebhookConfiguration resources
+      # This resource type is used by "elastic-cloud-on-kubernetes"
+      - .webhooks[].clientConfig.caBundle
+EOF
+
 echo '# Deploying bootstrap Argo CD app'
 microk8s.kubectl create namespace bootstrap
 cat <<EOF | microk8s.kubectl apply -n argocd -f -
