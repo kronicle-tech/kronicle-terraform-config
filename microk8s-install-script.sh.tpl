@@ -243,6 +243,8 @@ spec:
           value: "${kronicle_secrets_manager_secret_name}"
         - name: "applications.kronicle.helmParameters.externalDomain"
           value: "${external_domain}"
+        - name: "applications.zipkin.helmParameters.internalDomain"
+          value: "${internal_domain}"
 
       valueFiles:
         - values-prod.yaml
