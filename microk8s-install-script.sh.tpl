@@ -50,15 +50,38 @@ cat > /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json <<EOF
 EOF
 /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json -s
 
-echo '# Setting Route 53 DNS A record for private IP'
+echo '# Setting Route 53 DNS A record for Argo CD pointing to private IP address'
 cat > change-resource-record-sets.json <<EOF
 {
-    "Comment": "Set private IP record for microk8s",
+    "Comment": "Set private IP record for microk8s and Argo CD",
     "Changes": [
         {
             "Action": "UPSERT",
             "ResourceRecordSet": {
                 "Name": "argocd.${internal_domain}",
+                "Type": "A",
+                "TTL": 60,
+                "ResourceRecords": [
+                    {
+                        "Value": "$(wget -q -O - http://169.254.169.254/latest/meta-data/local-ipv4)"
+                    }
+                ]
+            }
+        }
+    ]
+}
+EOF
+aws route53 change-resource-record-sets --hosted-zone-id ${hosted_zone_id} --change-batch file://change-resource-record-sets.json
+
+echo '# Setting Route 53 DNS A record for Zipkin pointing to private IP address'
+cat > change-resource-record-sets.json <<EOF
+{
+    "Comment": "Set private IP record for microk8s and Zipkin",
+    "Changes": [
+        {
+            "Action": "UPSERT",
+            "ResourceRecordSet": {
+                "Name": "zipkin.${internal_domain}",
                 "Type": "A",
                 "TTL": 60,
                 "ResourceRecords": [
