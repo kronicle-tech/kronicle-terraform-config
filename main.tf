@@ -549,7 +549,7 @@ resource "aws_launch_template" "microk8s" {
     external_secrets_aws_role = aws_iam_role.external_secrets.arn
     cert_manager_aws_role = aws_iam_role.cert_manager.arn
     cert_manager_secrets_manager_secret_name = var.cert_manager_secrets_manager_secret_name
-    cert_manager_zerossl_eab_kid = var.cert_manager_zerossl_eab_kid
+    zerossl_eab_kid = var.zerossl_eab_kid
     kronicle_secrets_manager_secret_name = var.kronicle_secrets_manager_secret_name
   }))
 }

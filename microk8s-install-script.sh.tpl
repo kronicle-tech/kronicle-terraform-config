@@ -238,7 +238,7 @@ spec:
         - name: "certManagerSecretsManagerSecretName"
           value: "${cert_manager_secrets_manager_secret_name}"
         - name: "certManagerZerosslEabKid"
-          value: "${cert_manager_zerossl_eab_kid}"
+          value: "${zerossl_eab_kid}"
         - name: "kronicleSecretsManagerSecretName"
           value: "${kronicle_secrets_manager_secret_name}"
 
