@@ -8,7 +8,7 @@ variable "external_domain" {
   # example = "example.com"
 }
 
-variable "zerossl_eab_kid" {
+variable "cert_manager_zerossl_eab_kid" {
   description = "EAB KID for ZeroSSL"
   # example = "test1234"
 }
