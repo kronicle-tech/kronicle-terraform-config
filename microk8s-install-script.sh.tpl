@@ -237,7 +237,7 @@ spec:
           value: "${cert_manager_aws_role}"
         - name: "certManagerSecretsManagerSecretName"
           value: "${cert_manager_secrets_manager_secret_name}"
-        - name: "certManagerZerosslEabKid"
+        - name: "zerosslEabKid"
           value: "${zerossl_eab_kid}"
         - name: "kronicleSecretsManagerSecretName"
           value: "${kronicle_secrets_manager_secret_name}"
